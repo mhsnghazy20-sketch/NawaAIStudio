@@ -1,0 +1,2566 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#090c13">
+<title>Nawa AI Studio</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{
+    width:100%;height:100%;
+    background:#090c13;color:#f4f4f7;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,Tahoma,sans-serif;
+    overflow:hidden;position:fixed;inset:0;
+    transition:background .3s,color .3s;
+}
+button{font-family:inherit;border:0;background:none;cursor:pointer;color:inherit;padding:0;}
+input,textarea{font-family:inherit;}
+:root{--scale:1;}
+
+.app{
+    width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;
+    background:
+        radial-gradient(circle at 90% 15%,rgba(138,43,226,.28),transparent 40%),
+        radial-gradient(circle at 10% 85%,rgba(0,191,255,.22),transparent 40%),
+        radial-gradient(circle at 50% 50%,rgba(75,0,130,.15),transparent 60%),
+        #090c13;
+    transition:background .3s;
+}
+.header{
+    height:64px;border-bottom:1px solid rgba(255,255,255,.08);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 12px;flex-shrink:0;
+}
+.right-section{display:flex;align-items:center;gap:8px;}
+.top-btn{
+    width:42px;height:42px;border-radius:12px;
+    border:1px solid rgba(255,255,255,.15);
+    background:linear-gradient(135deg,#1f2536,#141925);
+    color:#e9ebf3;display:flex;justify-content:center;align-items:center;
+    font-size:calc(20px * var(--scale));
+    transition:transform .15s,background .3s,color .3s,border-color .3s;
+}
+.top-btn:active{transform:scale(.92);}
+.menu-lines{width:18px;display:flex;flex-direction:column;gap:3px;pointer-events:none;}
+.menu-lines span{height:2px;width:18px;border-radius:3px;background:linear-gradient(90deg,#a78bfa,#38bdf8);}
+.avatar{
+    width:42px;height:42px;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:calc(20px * var(--scale));font-weight:bold;color:white;
+    background:linear-gradient(135deg,#9333ea,#3b82f6);
+}
+.header-brand{display:flex;align-items:center;white-space:nowrap;margin-right:4px;}
+.brand-text{text-align:right;}
+.brand-title{
+    font-size:calc(18px * var(--scale));font-weight:800;
+    background:linear-gradient(135deg,#c084fc,#60a5fa);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.brand-status{margin-top:4px;color:#94a3b8;font-size:calc(12px * var(--scale));}
+.left-buttons{display:flex;gap:6px;}
+
+.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;display:none;opacity:0;transition:opacity .3s ease;pointer-events:none;}
+.sidebar-overlay.active{display:block;opacity:1;pointer-events:auto;}
+.sidebar{
+    position:fixed;top:0;right:0;width:300px;height:100%;
+    background:#111622;z-index:1000;display:flex;flex-direction:column;padding:18px 16px;
+    transform:translateX(100%);transition:transform .32s cubic-bezier(.32,.72,0,1),background .3s;
+    touch-action:pan-y;will-change:transform;
+}
+.sidebar.active{transform:translateX(0);}
+.sidebar.dragging{transition:none;}
+.sidebar-header{margin-bottom:16px;padding-bottom:12px;}
+.sidebar-title{font-size:calc(18px * var(--scale));font-weight:800;color:#f8fafc;}
+.sidebar-search{position:relative;margin-bottom:14px;}
+.sidebar-search input{
+    width:100%;height:44px;border-radius:14px;border:1px solid rgba(255,255,255,.1);
+    background:#0d1220;color:#ffffff;padding:0 48px 0 14px;
+    font-size:calc(14px * var(--scale));outline:none;font-weight:600;
+}
+.sidebar-search input::placeholder{color:#94a3b8;font-weight:500;}
+.sidebar-search .search-icon{
+    position:absolute;top:50%;right:8px;transform:translateY(-50%);
+    width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.05);
+    display:flex;align-items:center;justify-content:center;color:#ffffff;pointer-events:none;
+}
+.sidebar-search .search-icon svg{width:18px;height:18px;}
+.search-results{display:none;flex-direction:column;gap:4px;margin-bottom:12px;max-height:220px;overflow-y:auto;}
+.search-results.active{display:flex;}
+.search-empty{color:#94a3b8;font-size:calc(13px * var(--scale));text-align:center;padding:14px 0;}
+.search-result-item{padding:11px 12px;border-radius:10px;background:rgba(255,255,255,.05);color:#ffffff;font-size:calc(13.5px * var(--scale));cursor:pointer;text-align:right;font-weight:600;}
+.sidebar-links{display:flex;flex-direction:column;gap:0;overflow-y:auto;}
+.sidebar-links.flex-grow{flex:1;}
+.sidebar-link{
+    padding:13px 4px;background:transparent;color:#ffffff;
+    font-size:calc(15px * var(--scale));cursor:pointer;text-align:right;font-weight:700;
+    display:flex;align-items:center;gap:14px;
+}
+.sidebar-link .ico{width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#ffffff;}
+.sidebar-link .ico svg{width:22px;height:22px;stroke-width:1.9;fill:none;stroke:#ffffff;stroke-linecap:round;stroke-linejoin:round;}
+.sidebar-link .chat-info{flex:1;min-width:0;}
+.sidebar-link .chat-title{font-size:calc(14px * var(--scale));color:#ffffff;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sidebar-link .chat-date{font-size:calc(11px * var(--scale));color:#cbd5e1;margin-top:2px;font-weight:600;}
+.sidebar-divider{height:1px;background:rgba(255,255,255,.08);margin:8px 0;}
+.sidebar-footer{margin-top:auto;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);}
+.sidebar-bottom-row{display:flex;align-items:center;gap:8px;width:100%;}
+.sidebar-bottom-row .settings-btn{
+    flex:1;display:flex;align-items:center;gap:8px;padding:11px 14px;border-radius:22px;
+    color:#ffffff;font-size:calc(14px * var(--scale));font-weight:700;justify-content:center;
+}
+.sidebar-bottom-row .settings-btn .ico{width:18px;height:18px;display:flex;align-items:center;justify-content:center;}
+.sidebar-bottom-row .settings-btn .ico svg{width:18px;height:18px;stroke-width:1.9;stroke:#ffffff;}
+.sidebar-new-chat-btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    background:#2f7bf6;color:#ffffff;border-radius:22px;padding:11px 18px;font-weight:800;
+    font-size:calc(14px * var(--scale));flex-shrink:0;
+}
+.sidebar-new-chat-btn .ico{width:18px;height:18px;display:flex;align-items:center;justify-content:center;}
+.sidebar-new-chat-btn .ico svg{width:18px;height:18px;stroke-width:2;stroke:#ffffff;}
+
+.chat-context-menu{position:fixed;background:#ffffff;border-radius:20px;padding:8px;box-shadow:0 20px 60px rgba(0,0,0,.35);z-index:4000;min-width:240px;display:none;direction:rtl;animation:ctxIn .18s ease;}
+.chat-context-menu.active{display:block;}
+@keyframes ctxIn{from{opacity:0;transform:scale(.94);}to{opacity:1;transform:scale(1);}}
+.chat-ctx-item{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 16px;border-radius:14px;color:#000;font-size:16px;font-weight:500;cursor:pointer;background:transparent;border:0;width:100%;text-align:right;}
+.chat-ctx-item:hover{background:#f2f2f7;}
+.chat-ctx-item .ctx-label{flex:1;text-align:right;}
+.chat-ctx-item .ctx-ico{width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#000;flex-shrink:0;}
+.chat-ctx-item .ctx-ico svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.chat-ctx-item.danger{color:#ff3b30;}
+.chat-ctx-item.danger .ctx-ico{color:#ff3b30;}
+body:not(.light) .chat-context-menu{background:#1c1c1e;}
+body:not(.light) .chat-ctx-item{color:#fff;}
+body:not(.light) .chat-ctx-item:hover{background:#2c2c2e;}
+body:not(.light) .chat-ctx-item .ctx-ico{color:#fff;}
+body:not(.light) .chat-ctx-item.danger{color:#ff453a;}
+
+.project-menu{position:fixed;background:#ffffff;border-radius:20px;padding:8px;box-shadow:0 20px 60px rgba(0,0,0,.35);z-index:4000;min-width:240px;display:none;direction:rtl;animation:ctxIn .18s ease;}
+.project-menu.active{display:block;}
+.project-menu-item{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;border-radius:14px;color:#000;font-size:16px;font-weight:600;cursor:pointer;background:transparent;border:0;width:100%;text-align:right;}
+.project-menu-item:hover{background:#f2f2f7;}
+.project-menu-item .pm-label{flex:1;text-align:right;}
+.project-menu-item .pm-ico{width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#000;flex-shrink:0;}
+.project-menu-item .pm-ico svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+body:not(.light) .project-menu{background:#1c1c1e;}
+body:not(.light) .project-menu-item{color:#fff;}
+body:not(.light) .project-menu-item:hover{background:#2c2c2e;}
+</style><style>
+.main{
+    width:100%;flex:1;display:flex;flex-direction:column;
+    overflow:hidden;position:relative;
+}
+.welcome{
+    position:absolute;
+    top:62px;
+    left:50%;
+    transform:translateX(-50%);
+    width:100%;
+    padding:0 16px;
+    text-align:center;
+    z-index:5;
+}
+.welcome-small{
+    font-size:calc(32px * var(--scale));
+    line-height:1.1;
+    font-weight:800;
+    background:linear-gradient(135deg,#ffffff,#c084fc,#60a5fa);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    display:inline-block;
+}
+.welcome-studio{
+    font-size:calc(32px * var(--scale));
+    line-height:1.1;
+    font-weight:800;
+    background:linear-gradient(135deg,#ffffff,#c084fc,#60a5fa);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    display:block;
+    margin-top:10px;
+    margin-bottom:18px;
+}
+.welcome h1{
+    font-size:calc(32px * var(--scale));
+    line-height:1.3;
+    font-weight:800;
+    background:linear-gradient(135deg,#ffffff,#c084fc,#60a5fa);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.chat-area{
+    display:none;flex-direction:column;gap:14px;
+    width:100%;max-width:750px;max-height:100%;
+    overflow-y:auto;padding:20px 12px 140px;
+    margin:0 auto;
+    position:absolute;inset:0;
+}
+.message{
+    max-width:82%;padding:12px 16px;border-radius:16px;
+    font-size:calc(14px * var(--scale));line-height:1.5;
+    white-space:pre-wrap;word-break:break-word;
+    -webkit-user-select:text;user-select:text;cursor:text;
+}
+.message.user{align-self:flex-start;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;border-bottom-left-radius:4px;}
+.message.ai{align-self:flex-end;background:#141a28;border:1px solid rgba(255,255,255,.08);color:#e2e8f0;border-bottom-right-radius:4px;}
+.ai-message-wrap{display:flex;flex-direction:column;align-self:flex-end;max-width:82%;gap:2px;align-items:flex-end;}
+.ai-message-wrap .message.ai{align-self:stretch;max-width:100%;}
+.ai-actions{
+    display:flex;align-items:center;gap:22px;
+    padding:6px 4px 2px;flex-direction:row;
+    justify-content:flex-end;width:100%;
+    opacity:0;animation:fadeIn .3s ease forwards;animation-delay:.1s;direction:rtl;
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.ai-action-btn{width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:#8e8e93;cursor:pointer;background:none;border:0;padding:0;flex-shrink:0;}
+.ai-action-btn svg{width:20px;height:20px;stroke:#8e8e93;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
+.ai-action-btn.dots svg circle{fill:#8e8e93;stroke:none;}
+.ai-menu{position:fixed;background:#ffffff;border-radius:18px;padding:6px;box-shadow:0 14px 40px rgba(0,0,0,.35);direction:rtl;color:#000;display:none;z-index:3000;min-width:220px;}
+.ai-menu.active{display:block;animation:menuIn .18s ease;}
+@keyframes menuIn{from{opacity:0;transform:translateY(-6px) scale(.96);}to{opacity:1;transform:translateY(0) scale(1);}}
+.ai-menu-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;width:100%;text-align:right;color:#000;font-size:15px;font-weight:500;cursor:pointer;background:transparent;border:0;}
+.ai-menu-item:hover{background:#f2f2f7;}
+.ai-menu-item .menu-ico{width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:#000;flex-shrink:0;}
+.ai-menu-item .menu-ico svg{width:20px;height:20px;stroke-width:1.7;fill:none;stroke:currentColor;}
+
+.typing{
+    display:none;position:absolute;bottom:130px;left:0;right:0;
+    max-width:750px;margin:auto;padding:0 20px;text-align:right;
+}
+.typing .pulse-dot{
+    display:inline-block;width:18px;height:18px;border-radius:50%;
+    background:#166534;vertical-align:middle;
+    animation:pulseGrow 1.2s ease-in-out infinite, spinDot 1.6s linear infinite, colorMix 3s ease-in-out infinite;
+}
+@keyframes pulseGrow{0%,100%{transform:scale(.55);opacity:.75;}50%{transform:scale(1.15);opacity:1;}}
+@keyframes spinDot{0%{transform:rotate(0deg) scale(.55);}50%{transform:rotate(180deg) scale(1.15);}100%{transform:rotate(360deg) scale(.55);}}
+@keyframes colorMix{0%{background:#166534;}25%{background:#0d9488;}50%{background:#1e40af;}75%{background:#0d9488;}100%{background:#166534;}}
+
+.composer-container{
+    position:fixed;bottom:0;left:0;right:0;
+    background:linear-gradient(to top,#090c13 85%,rgba(9,12,19,0));
+    padding:10px 12px 14px;z-index:100;transition:background .3s;
+}
+.composer-wrapper{max-width:750px;margin:0 auto;}
+.composer{
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:20px;background:#121722;padding:12px 14px 10px;
+}
+textarea#messageInput{
+    width:100%;height:36px;resize:none;border:0;outline:0;
+    background:transparent;color:#f8fafc;
+    font-size:calc(14px * var(--scale));text-align:right;line-height:1.4;
+}
+textarea#messageInput::placeholder{color:#64748b;}
+.composer-bottom{display:flex;justify-content:space-between;align-items:center;direction:ltr;margin-top:6px;}
+.tools{display:flex;gap:6px;}
+.tool-btn{
+    width:38px;height:38px;border-radius:11px;
+    border:1px solid rgba(255,255,255,.08);
+    background:#1a2130;color:#cbd5e1;
+    font-size:calc(22px * var(--scale));
+    display:flex;align-items:center;justify-content:center;
+}
+
+/* ✅ زر الإرسال - 3 حالات:
+   1. فارغ → موجة بيضاء (الصورة 1 في طلب المستخدم السابق)
+   2. AI يكتب → مربع أبيض (الصورة 4 من الطلب الحالي) ← استبدال!
+   3. المستخدم يكتب → مستطيل بنفسجي/وردي + سهم
+*/
+.send-btn{
+    width:38px;height:38px;border-radius:50%;
+    background:#2563eb;
+    color:white;display:flex;align-items:center;justify-content:center;
+    transition:opacity .25s,transform .15s,filter .25s,background .25s,border-radius .25s;
+    position:relative;border:0;overflow:hidden;flex-shrink:0;
+}
+.send-btn .btn-icon{display:flex;align-items:center;justify-content:center;width:100%;height:100%;}
+.send-btn .btn-icon svg{width:22px;height:22px;}
+
+.send-btn .icon-wave{display:flex;}
+.send-btn .icon-square{display:none;}
+.send-btn .icon-arrow{display:none;}
+
+/* الحالة 2: AI يكتب → مربع أبيض داخل دائرة زرقاء */
+.send-btn.ai-writing{background:#2563eb;border-radius:50%;}
+.send-btn.ai-writing .icon-wave{display:none;}
+.send-btn.ai-writing .icon-square{display:flex;}
+.send-btn.ai-writing .icon-arrow{display:none;}
+.send-btn .icon-square::before{content:"";width:14px;height:14px;background:#ffffff;border-radius:3px;}
+
+.send-btn.has-text{background:linear-gradient(135deg,#a855f7,#ec4899);border-radius:10px;}
+.send-btn.has-text .icon-wave{display:none;}
+.send-btn.has-text .icon-square{display:none;}
+.send-btn.has-text .icon-arrow{display:flex;}
+.send-btn.has-text .icon-arrow svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+
+.send-btn.waiting{opacity:.55;pointer-events:none;filter:grayscale(.2);}
+.send-btn.waiting::after{
+    content:"";position:absolute;inset:6px;border-radius:50%;
+    border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;
+    animation:spin .8s linear infinite;
+}
+.send-btn.waiting .btn-icon{visibility:hidden;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.mic-btn{
+    width:38px;height:38px;border-radius:50%;
+    background:transparent;color:#cbd5e1;
+    display:flex;align-items:center;justify-content:center;margin-right:6px;
+}
+.mic-btn svg{width:22px;height:22px;stroke-width:1.8;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;}
+.right-actions{display:flex;align-items:center;gap:0;}
+
+.create-modal{
+    position:fixed;bottom:80px;right:16px;
+    width:calc(100% - 32px);max-width:290px;
+    background:#ffffff;border-radius:26px;padding:14px 12px;
+    box-shadow:0 18px 50px rgba(0,0,0,.28);
+    direction:rtl;color:#000;display:none;z-index:2000;
+}
+.create-modal.active{display:block;}
+.create-modal-option{display:flex;align-items:center;justify-content:flex-start;gap:14px;padding:10px 6px;border-radius:14px;color:#000;font-size:calc(17px * var(--scale));font-weight:500;text-align:right;width:100%;}
+.create-modal-option .opt-circle{width:46px;height:46px;border-radius:50%;background:#f2f2f7;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.create-modal-option .opt-circle svg{width:22px;height:22px;color:#000;stroke-width:1.6;fill:none;stroke:currentColor;}
+.media-message{padding:10px !important;display:flex;flex-direction:column;gap:8px;max-width:240px !important;}
+.media-preview{width:100%;max-height:260px;border-radius:12px;display:block;object-fit:cover;background:#000;}
+.media-name{font-size:calc(11px * var(--scale));color:#cbd5e1;text-align:center;padding:0 4px;word-break:break-all;}
+
+body.light{background:#eef2f7;color:#0f172a;}
+body.light .app{
+    background:
+        radial-gradient(circle at 90% 15%,rgba(138,43,226,.12),transparent 40%),
+        radial-gradient(circle at 10% 85%,rgba(0,191,255,.10),transparent 40%),
+        #eef2f7;
+}
+body.light .header{border-color:rgba(0,0,0,.08);}
+body.light .top-btn{background:linear-gradient(135deg,#ffffff,#e2e8f0);color:#1e293b;border-color:rgba(0,0,0,.1);}
+body.light .welcome-small,
+body.light .welcome-studio,
+body.light .welcome h1{background:linear-gradient(135deg,#1e293b,#7c3aed,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+body.light .message.ai{background:#fff;color:#1e293b;border-color:rgba(0,0,0,.08);}
+body.light .sidebar{background:#fff;}
+body.light .sidebar-title{color:#0f172a;}
+body.light .sidebar-search input{background:#f1f5f9;color:#0f172a;border-color:rgba(0,0,0,.08);font-weight:700;}
+body.light .sidebar-search .search-icon{background:rgba(0,0,0,.05);color:#0f172a;}
+body.light .sidebar-link{color:#0f172a;}
+body.light .sidebar-link .ico{color:#0f172a;}
+body.light .sidebar-link .ico svg{stroke:#0f172a;}
+body.light .sidebar-link .chat-title{color:#0f172a;}
+body.light .sidebar-link .chat-date{color:#475569;}
+body.light .sidebar-divider{background:rgba(0,0,0,.08);}
+body.light .sidebar-footer{border-color:rgba(0,0,0,.08);}
+body.light .sidebar-bottom-row .settings-btn{color:#0f172a;}
+body.light .sidebar-bottom-row .settings-btn .ico svg{stroke:#0f172a;}
+body.light .composer-container{background:linear-gradient(to top,#eef2f7 85%,rgba(238,242,247,0));}
+body.light .composer{background:#fff;border-color:rgba(0,0,0,.1);}
+body.light textarea#messageInput{color:#0f172a;}
+body.light .tool-btn{background:#f1f5f9;color:#334155;border-color:rgba(0,0,0,.06);}
+body.light .mic-btn{color:#3a3a3c;}
+</style><style>
+.voice-listen-screen{
+    position:fixed;inset:0;background:#000;z-index:5000;
+    display:none;flex-direction:column;direction:rtl;overflow:hidden;
+}
+.voice-listen-screen.active{display:flex;}
+
+.vls-header{
+    position:relative;flex-shrink:0;
+    padding:14px 20px;
+    display:flex;align-items:center;justify-content:space-between;
+    min-height:56px;z-index:10;
+}
+.vls-icon-btn{
+    width:40px;height:40px;border-radius:12px;
+    background:transparent;color:#fff;
+    display:flex;align-items:center;justify-content:center;border:0;
+    flex-shrink:0;
+}
+.vls-icon-btn svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.vls-title{
+    position:absolute;left:50%;top:50%;
+    transform:translate(-50%,-50%);
+    font-size:calc(18px * var(--scale));font-weight:600;
+    color:#ffffff;white-space:nowrap;
+}
+
+.vls-body{
+    flex:1;position:relative;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+}
+.vls-transcript{
+    position:absolute;inset:0;padding:20px 26px 200px;
+    overflow-y:auto;text-align:right;
+    color:#e5e5ea;font-size:calc(16px * var(--scale));
+    line-height:1.9;direction:rtl;
+    display:none;z-index:2;
+}
+.vls-transcript.active{display:block;}
+
+.vls-orb-wrap{
+    position:relative;width:280px;height:280px;
+    display:flex;align-items:center;justify-content:center;
+    transition:opacity .4s;
+}
+.vls-orb-wrap.hidden{opacity:0;pointer-events:none;}
+.vls-orb{
+    width:230px;height:230px;border-radius:50%;
+    background:
+        radial-gradient(circle at 25% 25%, #ffd9c2 0%, transparent 50%),
+        radial-gradient(circle at 75% 25%, #c8e0ff 0%, transparent 50%),
+        radial-gradient(circle at 50% 75%, #ffc8e0 0%, transparent 55%),
+        radial-gradient(circle at 50% 50%, #e0c8ff 0%, transparent 75%),
+        linear-gradient(135deg, #ffe4c8 0%, #ffc8e0 40%, #d5b8ff 70%, #c8e0ff 100%);
+    box-shadow:
+        0 0 80px 30px rgba(255,200,224,.4),
+        0 0 160px 60px rgba(213,184,255,.3),
+        0 0 240px 100px rgba(200,224,255,.2);
+    animation:orbPulse 4s ease-in-out infinite;
+    filter:blur(.5px);
+}
+@keyframes orbPulse{
+    0%,100%{ transform:scale(1); filter:blur(.5px) brightness(1); }
+    50%    { transform:scale(1.05); filter:blur(1.5px) brightness(1.15); }
+}
+
+.vls-footer{
+    position:absolute;bottom:0;left:0;right:0;
+    padding:24px 20px 40px;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:14px;z-index:10;
+}
+.vls-btn-circle{
+    width:56px;height:56px;border-radius:50%;
+    background:#1c1c1e;color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    border:0;flex-shrink:0;
+    transition:transform .15s,background .2s;
+}
+.vls-btn-circle:active{transform:scale(.92);}
+.vls-btn-circle.cancel svg{stroke:#ff453a;}
+.vls-btn-circle svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+
+.vls-center{
+    flex:1;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:14px;
+}
+.vls-dots{display:flex;gap:7px;align-items:center;justify-content:center;height:20px;}
+.vls-dots span{
+    width:10px;height:10px;border-radius:50%;
+    background:#ffffff;
+    animation:dotBounce 1.2s ease-in-out infinite;
+}
+.vls-dots span:nth-child(2){animation-delay:.15s;}
+.vls-dots span:nth-child(3){animation-delay:.3s;}
+@keyframes dotBounce{
+    0%,100%{ transform:translateY(0); opacity:.55; }
+    50%    { transform:translateY(-6px); opacity:1; }
+}
+.vls-dots.paused span{display:none;}
+.vls-dots.paused::after{
+    content:"";width:20px;height:20px;background:#8e8e93;
+    border-radius:4px;display:block;
+}
+.vls-status{
+    font-size:calc(14px * var(--scale));color:#8e8e93;
+    font-weight:500;text-align:center;direction:rtl;
+}
+</style><style>
+.library-overlay{position:fixed;inset:0;background:#f2f2f7;z-index:1150;display:none;overflow-y:auto;}
+.library-overlay.active{display:block;}
+.library-modal{width:100%;min-height:100vh;background:#f2f2f7;color:#000;padding:8px 14px 40px;max-width:640px;margin:0 auto;}
+.library-header{display:flex;align-items:center;justify-content:space-between;padding:14px 6px 18px;position:relative;min-height:70px;}
+.library-header h3{font-size:calc(22px * var(--scale));font-weight:700;color:#000;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap;}
+.library-tabs{display:flex;gap:6px;background:#e5e5ea;padding:4px;border-radius:12px;margin-bottom:16px;}
+.library-tab{flex:1;padding:10px;background:transparent;border-radius:9px;font-size:calc(14px * var(--scale));font-weight:600;color:#3a3a3c;}
+.library-tab.active{background:#ffffff;color:#000;}
+.library-content{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.library-item{aspect-ratio:1;border-radius:12px;overflow:hidden;background:#e5e5ea;cursor:pointer;}
+.library-item img,.library-item video{width:100%;height:100%;object-fit:cover;display:block;}
+.library-empty{grid-column:1/-1;text-align:center;color:#8e8e93;font-size:calc(14px * var(--scale));padding:60px 20px;}
+
+.settings-overlay{position:fixed;inset:0;background:#f2f2f7;z-index:1100;display:none;overflow-y:auto;overflow-x:hidden;}
+.settings-overlay.active{display:block;}
+.settings-modal{width:100%;min-height:100vh;background:#f2f2f7;color:#000;padding:8px 14px 40px;max-width:640px;margin:0 auto;position:relative;}
+.settings-screen{display:none;width:100%;}
+.settings-screen.active{display:block;animation:slideFromRight .32s cubic-bezier(.32,.72,0,1);}
+.settings-screen.active.coming-back{animation:slideFromLeft .32s cubic-bezier(.32,.72,0,1);}
+@keyframes slideFromRight{from{opacity:0;transform:translateX(-40px);}to{opacity:1;transform:translateX(0);}}
+@keyframes slideFromLeft{from{opacity:0;transform:translateX(-40px);}to{opacity:1;transform:translateX(0);}}
+.settings-topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 6px 18px;position:relative;min-height:64px;}
+.settings-topbar h2{font-size:calc(24px * var(--scale));font-weight:800;color:#000;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap;}
+
+.settings-group{background:#ffffff;border-radius:18px;overflow:hidden;margin-bottom:24px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.setting-item{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:#ffffff;width:100%;text-align:right;transition:background .15s;}
+.setting-item:active{background:#f2f2f7;}
+.setting-item + .setting-item{border-top:1px solid #ebebf0;}
+.setting-item .right{display:flex;align-items:center;gap:14px;flex:1;min-width:0;}
+.setting-item .icon{width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:#000;flex-shrink:0;order:-1;}
+.setting-item .icon svg{width:22px;height:22px;stroke-width:1.5;fill:none;stroke:currentColor;}
+.setting-item .icon.aa{font-family:-apple-system,"Segoe UI",serif;font-size:calc(18px * var(--scale));font-weight:600;}
+.setting-item .label{font-size:calc(16.5px * var(--scale));font-weight:500;color:#000;}
+.setting-item .left{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.setting-item .value{font-size:calc(15px * var(--scale));color:#8e8e93;font-weight:400;}
+.setting-item .chevron{width:15px;height:15px;color:#c7c7cc;transform:scaleX(-1);}
+.setting-item.danger .label,
+.setting-item.danger .icon{color:#ff3b30;}
+.settings-subheader{font-size:calc(13px * var(--scale));color:#8e8e93;font-weight:500;padding:0 8px 8px;}
+
+.subpage-header{display:flex;align-items:center;justify-content:space-between;padding:12px 6px 16px;margin-bottom:10px;position:relative;min-height:60px;}
+.subpage-header h3{font-size:calc(20px * var(--scale));font-weight:700;color:#000;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap;}
+.subpage-header .spacer{width:40px;height:40px;visibility:hidden;order:0;}
+.back-btn{width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.04);color:#111;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;padding:0;order:2;margin-left:auto;border:0;}
+.back-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+
+.options-list{display:flex;flex-direction:column;border-radius:18px;overflow:hidden;background:#fff;}
+.option-item{display:flex;align-items:center;justify-content:space-between;padding:17px 18px;background:transparent;width:100%;text-align:right;font-size:calc(16.5px * var(--scale));color:#000;}
+.option-item + .option-item{border-top:1px solid #ebebf0;}
+.option-item.active{color:#007aff;font-weight:600;}
+.option-item .check{color:#007aff;font-size:calc(18px * var(--scale));visibility:hidden;font-weight:700;}
+.option-item.active .check{visibility:visible;}
+
+.input-label{font-size:13px;color:#8e8e93;padding:0 8px 8px;display:block;}
+.input-field{width:100%;height:52px;border-radius:14px;border:1px solid #e5e5ea;background:#f7f7fa;padding:0 16px;font-size:16px;color:#000;outline:none;direction:ltr;text-align:left;}
+.primary-btn{width:100%;padding:16px;border-radius:16px;background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;font-size:16px;font-weight:700;margin-top:14px;}
+
+.account-card{background:#e9e9ec;border-radius:20px;padding:22px 18px;margin-bottom:14px;text-align:center;}
+.account-avatar{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#ec4899);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;color:#fff;font-size:32px;font-weight:800;}
+.account-email{font-size:calc(17px * var(--scale));font-weight:600;color:#000;word-break:break-all;margin-bottom:6px;direction:ltr;}
+.account-status{font-size:calc(13px * var(--scale));color:#34c759;font-weight:600;display:inline-flex;align-items:center;gap:5px;}
+.account-status::before{content:"";width:8px;height:8px;border-radius:50%;background:#34c759;}
+.account-actions{display:flex;flex-direction:column;gap:10px;}
+.account-action-btn{width:100%;background:#e9e9ec;border-radius:18px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:right;color:#000;}
+.account-action-btn .acc-info{display:flex;flex-direction:column;gap:2px;flex:1;text-align:right;}
+.account-action-btn .acc-title{font-size:calc(15.5px * var(--scale));font-weight:600;color:#000;}
+.account-action-btn .acc-sub{font-size:calc(12.5px * var(--scale));color:#8e8e93;}
+.account-action-btn .acc-icon{width:36px;height:36px;border-radius:11px;background:#ffffff;color:#000;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.account-action-btn .acc-icon svg{width:20px;height:20px;stroke-width:1.6;fill:none;stroke:currentColor;}
+.account-email-input-wrap{margin-bottom:14px;}
+
+.custom-section{background:#fff;border-radius:18px;padding:18px;margin-bottom:12px;}
+.custom-section-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:12px;}
+.custom-section-title{font-size:calc(16.5px * var(--scale));font-weight:500;color:#000;flex:1;text-align:right;}
+.custom-section-value{font-size:calc(15px * var(--scale));color:#8e8e93;font-weight:400;}
+.custom-section-right{display:flex;align-items:center;gap:6px;color:#8e8e93;}
+.custom-section-right .chev{width:16px;height:16px;transition:transform .25s;}
+.custom-section.open .custom-section-right .chev{transform:rotate(180deg);}
+.custom-section-body{display:none;margin-top:12px;padding-top:12px;border-top:1px solid rgba(0,0,0,.06);}
+.custom-section.open .custom-section-body{display:block;}
+.custom-note{font-size:calc(14.5px * var(--scale));color:#3a3a3c;line-height:1.6;padding:8px 6px 4px;text-align:right;}
+.ref-photo-row{display:flex;flex-direction:column;gap:10px;margin-top:8px;}
+.ref-photo-card{background:#f2f2f7;border-radius:16px;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;}
+.ref-photo-card .ref-info{display:flex;flex-direction:column;gap:3px;flex:1;text-align:right;}
+.ref-photo-card .ref-info-title{font-size:calc(15px * var(--scale));font-weight:600;color:#000;}
+.ref-photo-thumb{width:52px;height:52px;border-radius:12px;background:#f2f2f7;display:flex;align-items:center;justify-content:center;color:#c7c7cc;overflow:hidden;flex-shrink:0;}
+.ref-photo-thumb svg{width:26px;height:26px;stroke-width:1.6;fill:none;stroke:currentColor;}
+.ref-photo-thumb img{width:100%;height:100%;object-fit:cover;}
+
+.custom-toggle-row,.mem-toggle-row{display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:18px;padding:18px;margin-bottom:12px;}
+.custom-toggle-row .toggle-info{flex:1;text-align:right;}
+.custom-toggle-row .toggle-title{font-size:calc(16.5px * var(--scale));font-weight:500;color:#000;margin-bottom:2px;}
+.mem-toggle-row .mem-title{font-size:calc(16.5px * var(--scale));font-weight:500;color:#000;}
+
+.switch{position:relative;width:52px;height:32px;flex-shrink:0;display:inline-block;}
+.switch input{opacity:0;width:0;height:0;}
+.switch .slider{position:absolute;inset:0;background:#c7c7cc;border-radius:32px;transition:background .25s;}
+.switch .slider::before{content:"";position:absolute;height:28px;width:28px;left:2px;top:2px;background:#fff;border-radius:50%;transition:transform .25s;}
+.switch input:checked + .slider{background:#000;}
+.switch input:checked + .slider::before{transform:translateX(20px);}
+
+.custom-textarea,.mem-input{width:100%;background:#fff;border:0;border-radius:18px;padding:18px;font-size:calc(16px * var(--scale));color:#000;text-align:right;resize:none;outline:none;line-height:1.6;margin-bottom:12px;}
+.custom-textarea{min-height:120px;}
+.mem-input{min-height:64px;}
+.mem-input.small{min-height:60px;}
+.custom-textarea::placeholder,.mem-input::placeholder{color:#8e8e93;}
+
+.mem-card{background:#fff;border-radius:18px;padding:18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;cursor:pointer;}
+.mem-card .mem-card-title{font-size:calc(16.5px * var(--scale));font-weight:500;color:#000;}
+.mem-card .mem-chev{width:18px;height:18px;color:#8e8e93;transform:scaleX(-1);}
+.mem-label{font-size:calc(14.5px * var(--scale));color:#8e8e93;padding:14px 12px 8px;text-align:right;display:block;}
+
+.ext-card{background:#fff;border-radius:18px;padding:18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;cursor:pointer;}
+.ext-card .ext-info{display:flex;flex-direction:column;gap:3px;flex:1;text-align:right;}
+.ext-card .ext-title{font-size:calc(16.5px * var(--scale));font-weight:500;color:#000;}
+.ext-card .ext-sub{font-size:calc(13.5px * var(--scale));color:#8e8e93;line-height:1.4;}
+.ext-card .ext-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.ext-card .ext-value{font-size:calc(15px * var(--scale));color:#8e8e93;}
+.ext-card .ext-chev{width:18px;height:18px;color:#8e8e93;transform:scaleX(-1);}
+.ext-card .ext-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f2f2f7;color:#000;flex-shrink:0;}
+.ext-card .ext-icon svg{width:20px;height:20px;stroke-width:1.6;fill:none;stroke:currentColor;}
+
+.perm-radio-card{background:#fff;border-radius:18px;padding:18px;display:flex;align-items:center;gap:16px;margin-bottom:12px;cursor:pointer;}
+.perm-radio-circle{width:26px;height:26px;border-radius:50%;border:2.5px solid #8e8e93;flex-shrink:0;position:relative;}
+.perm-radio-circle::after{content:"";position:absolute;inset:4px;border-radius:50%;background:#000;opacity:0;transform:scale(.5);transition:opacity .2s,transform .2s;}
+.perm-radio-card.selected .perm-radio-circle::after{opacity:1;transform:scale(1);}
+.perm-radio-card.selected .perm-radio-circle{border-color:#000;}
+.perm-radio-content{flex:1;text-align:right;}
+.perm-radio-title{font-size:calc(17px * var(--scale));font-weight:600;color:#000;margin-bottom:6px;}
+.perm-radio-desc{font-size:calc(14px * var(--scale));color:#3a3a3c;line-height:1.55;}
+.perm-bottom-note{font-size:calc(14.5px * var(--scale));color:#8e8e93;text-align:center;line-height:1.6;padding:16px 20px 6px;}
+
+.app-info-card{background:linear-gradient(135deg,#7c3aed,#ec4899);border-radius:22px;padding:26px 22px;color:#fff;text-align:center;margin-bottom:16px;}
+.app-info-card .app-logo{width:70px;height:70px;border-radius:20px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:32px;font-weight:800;}
+.app-info-card h3{font-size:20px;font-weight:800;margin-bottom:4px;}
+.app-info-card p{font-size:13px;opacity:.9;}
+
+.rating-stars{display:flex;justify-content:center;gap:8px;margin:24px 0 20px;}
+.rating-stars .star{width:44px;height:44px;cursor:pointer;color:#c7c7cc;transition:transform .15s,color .15s;}
+.rating-stars .star.active{color:#ffcc00;}
+.rating-stars .star svg{width:100%;height:100%;}
+.rating-text{text-align:center;font-size:calc(15px * var(--scale));color:#8e8e93;margin-bottom:20px;}
+.rating-feedback{width:100%;min-height:100px;border-radius:18px;background:#fff;border:0;padding:16px;font-size:calc(15px * var(--scale));color:#000;text-align:right;resize:none;outline:none;line-height:1.6;margin-bottom:14px;}
+
+.font-page-card{background:#ffffff;border-radius:22px;padding:20px;margin-bottom:14px;}
+.font-page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.font-page-title{font-size:calc(20px * var(--scale));font-weight:700;color:#000;}
+.font-page-reset{display:flex;align-items:center;gap:6px;color:#8e8e93;font-size:calc(14px * var(--scale));font-weight:500;}
+.font-page-reset .reset-ico{font-size:calc(16px * var(--scale));display:inline-block;transform:scaleX(-1);}
+.font-page-preview-btn{display:inline-block;background:#007aff;color:#fff;padding:16px 26px;border-radius:18px;font-size:calc(22px * var(--scale));font-weight:600;margin-bottom:16px;}
+.font-page-preview-box{background:#f2f2f7;border-radius:18px;padding:22px 20px;text-align:center;color:#000;font-size:calc(18px * var(--scale));font-weight:500;line-height:1.5;}
+.font-slider-wrap{display:flex;align-items:center;gap:14px;padding:40px 4px 8px;}
+.font-slider-label{font-size:calc(26px * var(--scale));font-weight:700;color:#3a3a3c;flex-shrink:0;line-height:1;}
+.font-slider-label.small{font-size:calc(20px * var(--scale));}
+.font-slider{flex:1;-webkit-appearance:none;appearance:none;height:6px;border-radius:100px;background:#e5e5ea;outline:none;cursor:pointer;}
+.font-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:34px;height:34px;border-radius:50%;background:#ffffff;box-shadow:0 2px 8px rgba(0,0,0,.15);cursor:grab;}
+
+.upgrade-hero{background:linear-gradient(135deg,#7c3aed,#ec4899);border-radius:22px;padding:26px 22px;color:#fff;text-align:center;margin-bottom:14px;}
+.upgrade-hero .crown{font-size:34px;margin-bottom:10px;}
+.upgrade-hero h4{font-size:22px;font-weight:800;margin-bottom:6px;}
+.upgrade-hero p{font-size:13.5px;opacity:.9;}
+
+.voice-cards{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 20px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;}
+.voice-cards::-webkit-scrollbar{display:none;}
+.voice-card{flex:0 0 92%;scroll-snap-align:center;background:transparent;padding:0;text-align:center;cursor:pointer;border:0;}
+.voice-card .voice-image{width:100%;aspect-ratio:2 / 1.05;margin-bottom:18px;overflow:hidden;border-radius:110px;}
+.voice-card .voice-image.mira{background:radial-gradient(ellipse at 15% 30%, #b8cbff 0%, transparent 55%),radial-gradient(ellipse at 85% 70%, #a5b8ff 0%, transparent 55%),radial-gradient(ellipse at 50% 50%, #dde6ff 0%, transparent 70%),linear-gradient(135deg, #c8d4ff 0%, #e0e8ff 50%, #b3c4ff 100%);}
+.voice-card .voice-image.echo{background:radial-gradient(ellipse at 20% 25%, #8ba0e0 0%, transparent 55%),radial-gradient(ellipse at 80% 75%, #6f87d8 0%, transparent 55%),radial-gradient(ellipse at 50% 50%, #b0bfee 0%, transparent 70%),linear-gradient(135deg, #8b9edb 0%, #b8c5f0 45%, #7c92d4 100%);}
+.voice-card .voice-image.stella{background:radial-gradient(ellipse at 25% 30%, #f7d488 0%, transparent 60%),radial-gradient(ellipse at 80% 65%, #f5c96d 0%, transparent 55%),radial-gradient(ellipse at 50% 50%, #ffe9b8 0%, transparent 70%),linear-gradient(135deg, #f8dc9e 0%, #ffeec4 50%, #f4c868 100%);}
+.voice-card .voice-name{font-size:calc(28px * var(--scale));font-weight:600;color:#1a1a1a;margin-bottom:6px;letter-spacing:-.5px;}
+.voice-card .voice-desc{font-size:calc(19px * var(--scale));color:#8e8e93;}
+.voice-card.selected .voice-image{outline:2px solid #2563eb;outline-offset:2px;}
+
+.voice-row{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:#fff;border-radius:18px;margin-bottom:10px;cursor:pointer;gap:14px;position:relative;}
+.voice-row .voice-row-info{display:flex;flex-direction:column;gap:3px;flex:1;text-align:right;}
+.voice-row .voice-row-title{font-size:calc(16px * var(--scale));font-weight:600;color:#000;}
+.voice-row .voice-row-sub{font-size:calc(13px * var(--scale));color:#8e8e93;}
+.voice-row .voice-row-chev{width:18px;height:18px;color:#8e8e93;flex-shrink:0;transition:transform .25s;}
+.voice-row.open .voice-row-chev{transform:rotate(180deg);}
+
+.voice-dropdown{display:none;flex-direction:column;background:#ffffff;border-radius:18px;margin-top:-4px;margin-bottom:10px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.08);animation:dropIn .2s ease;max-height:400px;overflow-y:auto;}
+.voice-dropdown.active{display:flex;}
+@keyframes dropIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+.voice-dropdown-item{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;background:transparent;color:#000;font-size:calc(15.5px * var(--scale));font-weight:500;text-align:right;cursor:pointer;border:0;width:100%;}
+.voice-dropdown-item + .voice-dropdown-item{border-top:1px solid #f0f0f3;}
+.voice-dropdown-item .dd-check{color:#007aff;font-weight:700;font-size:calc(17px * var(--scale));visibility:hidden;}
+.voice-dropdown-item.active .dd-check{visibility:visible;}
+
+.dictation-empty{text-align:center;color:#8e8e93;font-size:calc(14px * var(--scale));padding:60px 20px;}
+.dictation-empty .ico-big{font-size:52px;margin-bottom:14px;}
+.dictation-item{background:#fff;border-radius:18px;padding:16px 18px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;}
+.dictation-item .dictation-head{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.dictation-item .dictation-date{font-size:calc(12px * var(--scale));color:#8e8e93;}
+.dictation-item .dictation-lang{font-size:calc(11px * var(--scale));color:#007aff;background:rgba(0,122,255,.1);padding:3px 10px;border-radius:100px;font-weight:600;}
+.dictation-item .dictation-text{font-size:calc(15.5px * var(--scale));color:#000;line-height:1.6;text-align:right;}
+.dictation-item .dictation-actions{display:flex;justify-content:flex-end;gap:14px;margin-top:4px;}
+.dictation-item .dictation-act{color:#007aff;font-size:calc(13.5px * var(--scale));font-weight:600;display:flex;align-items:center;gap:5px;}
+.dictation-item .dictation-act.delete{color:#ff3b30;}
+.dictation-item .dictation-act svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
+.dictation-clear-btn{width:100%;padding:14px;border-radius:16px;background:#fff;color:#ff3b30;font-size:calc(15px * var(--scale));font-weight:600;margin-top:14px;border:1px solid rgba(255,59,48,.15);}
+
+toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(20px);background:#7c3aed;color:#fff;padding:10px 20px;border-radius:12px;font-size:calc(13px * var(--scale));font-weight:600;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;z-index:1400;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+.new-project-screen{position:fixed;inset:0;background:#f2f2f7;z-index:1300;display:none;flex-direction:column;padding:16px;overflow-y:auto;direction:rtl;}
+.new-project-screen.active{display:flex;}
+.np-topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 4px 24px;position:relative;min-height:56px;}
+.np-topbar h3{font-size:calc(20px * var(--scale));font-weight:800;color:#000;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap;}
+.np-close{width:38px;height:38px;border-radius:50%;background:#ffffff;color:#000;display:flex;align-items:center;justify-content:center;border:0;order:0;}
+.np-close svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+.np-spacer{width:38px;height:38px;}
+.np-input-wrap{position:relative;margin-bottom:24px;}
+.np-input{width:100%;height:58px;border-radius:20px;background:#e9e9ec;border:0;padding:0 60px 0 18px;font-size:calc(16px * var(--scale));color:#000;text-align:right;outline:none;font-weight:500;}
+.np-input::placeholder{color:#8e8e93;}
+.np-input-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;background:#d1d1d6;color:#ffffff;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.np-input-icon svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.np-info{font-size:calc(14px * var(--scale));color:#3a3a3c;line-height:1.7;padding:0 6px;text-align:right;margin-bottom:auto;}
+.np-info strong{font-weight:700;color:#000;}
+.np-create-btn{margin-top:auto;width:100%;padding:16px;border-radius:20px;background:#e9e9ec;color:#8e8e93;font-size:calc(16px * var(--scale));font-weight:700;text-align:center;border:0;transition:background .2s,color .2s;}
+.np-create-btn.enabled{background:#000;color:#fff;}
+
+.tasks-screen{position:fixed;inset:0;background:#f2f2f7;z-index:1300;display:none;flex-direction:column;direction:rtl;}
+.tasks-screen.active{display:flex;}
+.tasks-topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;flex-shrink:0;}
+.tasks-topbar .tt-left{display:flex;gap:10px;align-items:center;}
+.tt-icon-btn{width:38px;height:38px;border-radius:10px;background:transparent;color:#000;display:flex;align-items:center;justify-content:center;border:0;}
+.tt-icon-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.tt-icon-btn.checked{background:#f5b324;color:#fff;}
+.tasks-back-btn{width:38px;height:38px;border-radius:50%;background:transparent;color:#000;display:flex;align-items:center;justify-content:center;border:0;}
+.tasks-back-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+.tasks-search{padding:0 16px 16px;flex-shrink:0;}
+.tasks-search-input{width:100%;height:52px;border-radius:26px;background:#e9e9ec;border:0;padding:0 50px 0 20px;font-size:calc(15px * var(--scale));color:#000;text-align:right;outline:none;}
+.tasks-search-input::placeholder{color:#8e8e93;}
+.tasks-search-wrap{position:relative;}
+.tasks-search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:22px;height:22px;color:#8e8e93;pointer-events:none;}
+.tasks-search-icon svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.tasks-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
+.tasks-empty-icon{width:110px;height:110px;border-radius:24px;background:#fef3c7;display:flex;align-items:center;justify-content:center;margin-bottom:24px;box-shadow:0 8px 24px rgba(245,179,36,.15);}
+.tasks-empty-icon svg{width:60px;height:60px;stroke:#f5b324;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
+.tasks-empty-text{font-size:calc(16px * var(--scale));color:#8e8e93;font-weight:500;text-align:center;}
+.tasks-fab{position:fixed;bottom:24px;left:24px;width:60px;height:60px;border-radius:50%;background:#f5b324;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(245,179,36,.4);z-index:1400;border:0;}
+.tasks-fab svg{width:32px;height:32px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;}
+
+.add-task-screen{position:fixed;inset:0;background:#f2f2f7;z-index:1400;display:none;flex-direction:column;padding:16px;direction:rtl;}
+.add-task-screen.active{display:flex;}
+.add-task-card{margin-top:80px;background:#ffffff;border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:20px;box-shadow:0 8px 30px rgba(0,0,0,.08);}
+.add-task-row{display:flex;align-items:flex-start;gap:14px;}
+.add-task-check{width:26px;height:26px;border-radius:8px;border:2px solid #c7c7cc;background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;cursor:pointer;}
+.add-task-check.checked{background:#f5b324;border-color:#f5b324;}
+.add-task-check svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;opacity:0;}
+.add-task-check.checked svg{opacity:1;}
+.add-task-input{flex:1;background:transparent;border:0;outline:none;font-size:calc(17px * var(--scale));color:#000;font-weight:500;resize:none;line-height:1.5;min-height:24px;font-family:inherit;text-align:right;}
+.add-task-input::placeholder{color:#8e8e93;}
+.add-task-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.add-task-reminder{display:flex;align-items:center;gap:8px;background:#f2f2f7;border-radius:14px;padding:10px 16px;color:#000;font-size:calc(15px * var(--scale));font-weight:600;border:0;cursor:pointer;}
+.add-task-reminder svg{width:20px;height:20px;stroke:#000;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.add-task-yes{color:#8e8e93;font-size:calc(15px * var(--scale));font-weight:600;padding:10px 8px;background:transparent;border:0;cursor:pointer;margin-right:auto;}
+
+/* Bottom Sheet للإبلاغ */
+.report-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1490;display:none;opacity:0;transition:opacity .3s ease;pointer-events:none;}
+.report-backdrop.active{display:block;opacity:1;pointer-events:auto;}
+.report-screen{
+    position:fixed;left:0;right:0;bottom:0;
+    background:#f2f2f7;color:#000;
+    z-index:1500;
+    border-top-left-radius:24px;border-top-right-radius:24px;
+    display:none;flex-direction:column;
+    padding:0;direction:rtl;
+    max-height:92vh;overflow:hidden;
+    transform:translateY(100%);
+    transition:transform .35s cubic-bezier(.32,.72,0,1);
+    box-shadow:0 -10px 40px rgba(0,0,0,.25);
+    will-change:transform;
+}
+.report-screen.active{display:flex;transform:translateY(0);}
+.report-screen.dragging{transition:none;}
+.report-handle-wrap{display:flex;justify-content:center;align-items:center;padding:10px 0 8px;cursor:grab;touch-action:none;flex-shrink:0;}
+.report-handle-wrap:active{cursor:grabbing;}
+.report-handle{width:44px;height:5px;background:#c7c7cc;border-radius:3px;}
+.report-body{padding:4px 22px 24px;display:flex;flex-direction:column;flex:1;overflow-y:auto;padding-bottom:calc(24px + env(safe-area-inset-bottom, 0));}
+.report-title{font-size:calc(26px * var(--scale));font-weight:800;color:#000;text-align:center;margin:8px 0 20px;}
+.report-label{font-size:calc(17px * var(--scale));font-weight:700;color:#000;margin-bottom:12px;text-align:right;}
+.report-textarea-wrap{border:2px solid #e5e5ea;border-radius:16px;padding:14px;background:transparent;min-height:180px;display:flex;flex-direction:column;margin-bottom:8px;}
+.report-textarea{width:100%;background:transparent;border:0;outline:none;font-size:calc(16px * var(--scale));color:#000;resize:none;text-align:right;line-height:1.6;flex:1;font-family:inherit;}
+.report-textarea::placeholder{color:#8e8e93;text-align:right;}
+.report-counter{font-size:calc(13px * var(--scale));color:#8e8e93;text-align:right;padding:0 6px 16px;}
+.report-info{font-size:calc(14.5px * var(--scale));color:#3a3a3c;text-align:center;line-height:1.6;padding:6px 0 18px;}
+.report-info .link{color:#007aff;text-decoration:underline;}
+.report-divider{height:1px;background:rgba(0,0,0,.08);margin:0 0 18px;}
+.report-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px;}
+.report-toggle-info{flex:1;text-align:right;}
+.report-toggle-title{font-size:calc(16.5px * var(--scale));font-weight:600;color:#000;margin-bottom:4px;}
+.report-toggle-sub{font-size:calc(13.5px * var(--scale));color:#8e8e93;line-height:1.5;}
+.report-send-btn{width:100%;padding:16px;border-radius:18px;background:#e9e9ec;color:#8e8e93;font-size:calc(16px * var(--scale));font-weight:700;border:0;text-align:center;transition:background .2s,color .2s;margin-bottom:4px;}
+.report-send-btn.enabled{background:#2563eb;color:#fff;}
+
+.project-item{background:#fff;border-radius:18px;padding:16px 18px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;}
+.project-item .pj-info{display:flex;flex-direction:column;gap:4px;flex:1;text-align:right;}
+.project-item .pj-name{font-size:calc(16px * var(--scale));font-weight:600;color:#000;}
+.project-item .pj-date{font-size:calc(12px * var(--scale));color:#8e8e93;}
+.project-item .pj-count{font-size:calc(12px * var(--scale));color:#007aff;font-weight:600;}
+.project-item .pj-chev{width:18px;height:18px;color:#8e8e93;transform:scaleX(-1);}
+
+body:not(.light) .new-project-screen,
+body:not(.light) .tasks-screen,
+body:not(.light) .add-task-screen{background:#000;color:#fff;}
+body:not(.light) .report-screen{background:#1c1c1e;}
+body:not(.light) .np-topbar h3,
+body:not(.light) .tasks-empty-text,
+body:not(.light) .report-title,
+body:not(.light) .tasks-back-btn{color:#fff;}
+body:not(.light) .np-close{background:#1c1c1e;color:#fff;}
+body:not(.light) .np-input{background:#1c1c1e;color:#fff;}
+body:not(.light) .np-info{color:#d1d1d6;}
+body:not(.light) .np-info strong{color:#fff;}
+body:not(.light) .np-create-btn{background:#1c1c1e;color:#8e8e93;}
+body:not(.light) .np-create-btn.enabled{background:#fff;color:#000;}
+body:not(.light) .tt-icon-btn{color:#fff;}
+body:not(.light) .tasks-search-input{background:#1c1c1e;color:#fff;}
+body:not(.light) .add-task-card{background:#1c1c1e;}
+body:not(.light) .add-task-input{color:#fff;}
+body:not(.light) .add-task-reminder{background:#2c2c2e;color:#fff;}
+body:not(.light) .add-task-reminder svg{stroke:#fff;}
+body:not(.light) .report-label,
+body:not(.light) .report-toggle-title,
+body:not(.light) .report-textarea{color:#fff;}
+body:not(.light) .report-textarea-wrap{border-color:rgba(255,255,255,.12);}
+body:not(.light) .report-info{color:#d1d1d6;}
+body:not(.light) .report-divider{background:rgba(255,255,255,.1);}
+body:not(.light) .report-send-btn{background:#2c2c2e;color:#8e8e93;}
+body:not(.light) .report-send-btn.enabled{background:#2563eb;color:#fff;}
+body:not(.light) .report-handle{background:#48484a;}
+body:not(.light) .project-item{background:#1c1c1e;}
+body:not(.light) .project-item .pj-name{color:#fff;}
+
+body:not(.light) .settings-overlay,
+body:not(.light) .settings-modal,
+body:not(.light) .library-overlay,
+body:not(.light) .library-modal{background:#000;color:#fff;}
+body:not(.light) .settings-topbar h2,
+body:not(.light) .library-header h3{color:#fff;}
+body:not(.light) .settings-group{background:#000;box-shadow:none;}
+body:not(.light) .setting-item{background:#1c1c1e;}
+body:not(.light) .setting-item + .setting-item{border-color:rgba(255,255,255,.08);}
+body:not(.light) .setting-item .icon,
+body:not(.light) .setting-item .label{color:#fff;}
+body:not(.light) .setting-item .chevron{color:#48484a;}
+body:not(.light) .setting-item.danger .label,
+body:not(.light) .setting-item.danger .icon{color:#ff453a;}
+body:not(.light) .subpage-header h3{color:#fff;}
+body:not(.light) .options-list{background:#000;}
+body:not(.light) .option-item{color:#fff;background:#1c1c1e;}
+body:not(.light) .option-item + .option-item{border-color:rgba(255,255,255,.08);}
+body:not(.light) .option-item.active{color:#0a84ff;}
+body:not(.light) .font-page-card{background:#1c1c1e;color:#fff;}
+body:not(.light) .font-page-title{color:#fff;}
+body:not(.light) .font-page-preview-box{background:#2c2c2e;color:#fff;}
+body:not(.light) .input-field{background:#1c1c1e;color:#fff;border-color:rgba(255,255,255,.1);}
+body:not(.light) .library-tabs{background:#1c1c1e;}
+body:not(.light) .library-tab{color:#8e8e93;}
+body:not(.light) .library-tab.active{background:#2c2c2e;color:#fff;}
+body:not(.light) .library-item{background:#1c1c1e;}
+body:not(.light) .custom-section,
+body:not(.light) .custom-toggle-row,
+body:not(.light) .mem-toggle-row,
+body:not(.light) .mem-card,
+body:not(.light) .ext-card,
+body:not(.light) .perm-radio-card,
+body:not(.light) .account-card,
+body:not(.light) .account-action-btn,
+body:not(.light) .voice-row,
+body:not(.light) .dictation-item{background:#1c1c1e;}
+body:not(.light) .custom-section-title,
+body:not(.light) .custom-toggle-row .toggle-title,
+body:not(.light) .mem-toggle-row .mem-title,
+body:not(.light) .mem-card .mem-card-title,
+body:not(.light) .ext-card .ext-title,
+body:not(.light) .perm-radio-title,
+body:not(.light) .account-action-btn .acc-title,
+body:not(.light) .voice-row .voice-row-title,
+body:not(.light) .dictation-item .dictation-text{color:#fff;}
+body:not(.light) .custom-textarea,
+body:not(.light) .mem-input{background:#1c1c1e;color:#fff;}
+body:not(.light) .back-btn{background:rgba(255,255,255,.08);color:#f4f4f7;}
+body:not(.light) .dictation-clear-btn{background:#1c1c1e;}
+</style>
+</head><body>
+
+<div class="app">
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <span class="sidebar-title">NawaAI Studio</span>
+    </div>
+    <div class="sidebar-search">
+        <input type="text" id="sidebarSearch" placeholder="ابحث في المحادثات...">
+        <span class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.5-4.5"/></svg></span>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+    <div class="sidebar-links">
+        <div class="sidebar-link" id="openImagesBtn">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M9 21h10a2 2 0 002-2V9"/><circle cx="8" cy="8" r="1.2"/><path d="M3 13l3.5-3.5 4 4 3-3 3.5 3.5"/></svg></span>
+            الصور
+        </div>
+        <div class="sidebar-link" id="openLibraryBtn">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="9.5" y="4" width="5" height="16" rx="1"/><rect x="16" y="4" width="5" height="16" rx="1"/></svg></span>
+            المكتبة
+        </div>
+        <div class="sidebar-link" id="newProjectBtn">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></span>
+            مشروع جديد
+        </div>
+        <div class="sidebar-link" id="notepadBtn">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 4h11l4 4v12a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1z"/><path d="M15 4v5h5"/><path d="M8 13h8M8 17h5"/></svg></span>
+            دفتر ملاحظات
+        </div>
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-links flex-grow" id="chatHistoryList"></div>
+    <div class="sidebar-footer">
+        <div class="sidebar-bottom-row">
+            <button class="settings-btn" id="openSettingsBtn" type="button">
+                <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg></span>
+                الإعدادات
+            </button>
+            <button class="sidebar-new-chat-btn" id="startNewSideBtn" type="button">
+                <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H5a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-6"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg></span>
+                الدردشة
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="chat-context-menu" id="chatContextMenu">
+    <button class="chat-ctx-item" data-action="pin" type="button"><span class="ctx-label">تثبيت</span><span class="ctx-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 3l5 5-4 1-4 4-1 5-2-2-4 4-2 2 2-2 4-4-2-2 5-1 4-4 1-4z"/></svg></span></button>
+    <button class="chat-ctx-item" data-action="rename" type="button"><span class="ctx-label">إعادة التسمية</span><span class="ctx-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></span></button>
+    <button class="chat-ctx-item" data-action="addToProject" type="button"><span class="ctx-label">إضافة إلى المشروع</span><span class="ctx-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M12 11v6M9 14h6"/></svg></span></button>
+    <button class="chat-ctx-item" data-action="archive" type="button"><span class="ctx-label">أرشفة</span><span class="ctx-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 001 1h12a1 1 0 001-1V8"/><path d="M10 12h4"/></svg></span></button>
+    <button class="chat-ctx-item danger" data-action="delete" type="button"><span class="ctx-label">حذف</span><span class="ctx-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></span></button>
+</div>
+
+<div class="project-menu" id="projectMenu">
+    <button class="project-menu-item" data-action="newProject" type="button"><span class="pm-label">مشروع جديد</span><span class="pm-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M12 11v6M9 14h6"/></svg></span></button>
+    <button class="project-menu-item" data-action="savedProjects" type="button"><span class="pm-label">المشاريع المحفوظة</span><span class="pm-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 13l2 2 4-4"/></svg></span></button>
+</div>
+
+<header class="header">
+    <div class="right-section">
+        <button class="top-btn" id="menuBtn" type="button"><div class="menu-lines"><span></span><span></span><span></span></div></button>
+        <div class="avatar">N</div>
+        <div class="header-brand"><div class="brand-text">
+            <div class="brand-title">NawaAI Studio</div>
+            <div class="brand-status">جاهز للعمل</div>
+        </div></div>
+    </div>
+    <div class="left-buttons">
+        <button class="top-btn" id="themeBtn" type="button">◐</button>
+        <button class="top-btn" id="newChatBtn" type="button">＋</button>
+    </div>
+</header>
+
+<main class="main">
+    <section class="welcome" id="welcome">
+        <p class="welcome-small">أهلاً بك في Nawa AI</p>
+        <span class="welcome-studio">Studio</span>
+        <h1>كيف يمكن مساعدتك</h1>
+    </section>
+    <div class="chat-area" id="chatArea"></div>
+    <div class="typing" id="typing"><span class="pulse-dot"></span></div>
+</main>
+
+<div class="composer-container">
+    <div class="composer-wrapper">
+        <div class="composer">
+            <textarea id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off"></textarea>
+            <div class="composer-bottom">
+                <div class="right-actions">
+                    <button class="send-btn" id="sendBtn" type="button" aria-label="إرسال">
+                        <span class="btn-icon icon-wave">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="2.5" y="9.5" width="2.2" height="5" rx="1.1" fill="#ffffff"/>
+                                <rect x="6.7" y="4" width="2.6" height="16" rx="1.3" fill="#ffffff"/>
+                                <rect x="11.3" y="7" width="2.6" height="10" rx="1.3" fill="#ffffff"/>
+                                <rect x="15.9" y="5.5" width="2.6" height="13" rx="1.3" fill="#ffffff"/>
+                                <rect x="20.3" y="9.5" width="2.2" height="5" rx="1.1" fill="#ffffff"/>
+                            </svg>
+                        </span>
+                        <span class="btn-icon icon-square"></span>
+                        <span class="btn-icon icon-arrow">
+                            <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                        </span>
+                    </button>
+                    <button class="mic-btn" id="micBtn" type="button" aria-label="الميكروفون">
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="3" width="6" height="12" rx="3"/>
+                            <path d="M5 11a7 7 0 0014 0"/>
+                            <line x1="12" y1="18" x2="12" y2="22"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="tools">
+                    <button class="tool-btn" id="createBtn" type="button" aria-label="إنشاء">＋</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ شاشة الاستماع -->
+<div class="voice-listen-screen" id="voiceListenScreen">
+    <div class="vls-header">
+        <button class="vls-icon-btn" id="vlsKeyboardBtn" type="button" aria-label="لوحة المفاتيح">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <rect x="3" y="6" width="18" height="12" rx="2"/>
+                <path d="M7 10h.01M10 10h.01M13 10h.01M16 10h.01M7 13h.01M10 13h.01M13 13h.01M16 13h.01M7 16h10"/>
+            </svg>
+        </button>
+        <div class="vls-title">NawaAI Studio</div>
+        <div style="width:40px;"></div>
+    </div>
+
+    <div class="vls-body">
+        <div class="vls-transcript" id="vlsTranscript"></div>
+        <div class="vls-orb-wrap" id="vlsOrbWrap">
+            <div class="vls-orb"></div>
+        </div>
+    </div>
+
+    <div class="vls-footer">
+        <button class="vls-btn-circle cancel" id="vlsCancel" type="button" aria-label="إلغاء">
+            <svg viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+
+        <div class="vls-center">
+            <div class="vls-dots" id="vlsDots"><span></span><span></span><span></span></div>
+            <div class="vls-status" id="vlsStatus">جارٍ الاستماع...</div>
+        </div>
+
+        <button class="vls-btn-circle mic-active" id="vlsMic" type="button" aria-label="الميكروفون">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <rect x="9" y="3" width="6" height="12" rx="3"/>
+                <path d="M5 11a7 7 0 0014 0"/>
+                <line x1="12" y1="18" x2="12" y2="22"/>
+                <line x1="8" y1="22" x2="16" y2="22"/>
+            </svg>
+        </button>
+    </div>
+</div>
+
+<div class="create-modal" id="createModal">
+    <div class="create-modal-options">
+        <button class="create-modal-option" id="videoBtn" type="button"><span class="opt-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="14" height="14" rx="2"/><path d="M17 10l4-3v10l-4-3"/></svg></span><span class="opt-label">فيديو</span></button>
+        <button class="create-modal-option" id="imageBtn" type="button"><span class="opt-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M21 16l-5-5L5 20"/></svg></span><span class="opt-label">صورة</span></button>
+        <button class="create-modal-option" id="cameraBtn" type="button"><span class="opt-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 7h3l2-2h8l2 2h3a1 1 0 011 1v11a1 1 0 01-1 1H3a1 1 0 01-1-1V8a1 1 0 011-1z"/><circle cx="12" cy="13" r="4"/></svg></span><span class="opt-label">الكاميرا</span></button>
+    </div>
+</div>
+
+<div class="ai-menu" id="aiMenu">
+    <button class="ai-menu-item" id="menuSearchWeb" type="button"><span class="menu-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/></svg></span><span class="menu-label">البحث في الويب</span></button>
+    <button class="ai-menu-item" id="menuRetry" type="button"><span class="menu-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 3v5h-5"/></svg></span><span class="menu-label">إعادة المحاولة</span></button>
+</div>
+
+<div class="new-project-screen" id="newProjectScreen">
+    <div class="np-topbar">
+        <button class="np-close" id="closeNewProject" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
+        <h3>مشروع جديد</h3>
+        <div class="np-spacer"></div>
+    </div>
+    <div class="np-input-wrap">
+        <input type="text" class="np-input" id="projectNameInput" placeholder="مثال: التخطيط لحفلة">
+        <span class="np-input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5-2 4-2 4 2 4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/><line x1="22" y1="6" x2="22" y2="10"/><line x1="20" y1="8" x2="24" y2="8"/></svg></span>
+    </div>
+    <div class="np-info">تمنح المشاريع <strong>NawaAI Studio</strong> سياقًا مشتركًا عبر الدردشات والملفات، كل ذلك في مكان واحد.</div>
+    <button class="np-create-btn" id="createProjectBtn" type="button">إنشاء مشروع</button>
+</div>
+
+<div class="tasks-screen" id="tasksScreen">
+    <div class="tasks-topbar">
+        <button class="tasks-back-btn" id="tasksBack" type="button" aria-label="رجوع">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <div class="tt-left">
+            <button class="tt-icon-btn checked" id="tasksCheckBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="5 12 10 17 19 7"/></svg></button>
+            <button class="tt-icon-btn" id="tasksListBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M14 4v8l3-2 3 2V4"/></svg></button>
+        </div>
+    </div>
+    <div class="tasks-search">
+        <div class="tasks-search-wrap">
+            <input type="text" class="tasks-search-input" id="tasksSearchInput" placeholder="بحث عن مهام">
+            <span class="tasks-search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.5-4.5"/></svg></span>
+        </div>
+    </div>
+    <div class="tasks-body" id="tasksBody">
+        <div class="tasks-empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="14" height="16" rx="2"/><path d="M7 9h6M7 13h6"/><path d="M15 10l1.5 1.5L21 7"/><path d="M15 16l1.5 1.5L21 13"/></svg></div>
+        <div class="tasks-empty-text">لا توجد مهام بعد</div>
+    </div>
+    <button class="tasks-fab" id="addTaskBtn" type="button" aria-label="إضافة مهمة">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+</div>
+
+<div class="add-task-screen" id="addTaskScreen">
+    <div class="add-task-card">
+        <div class="add-task-row">
+            <button class="add-task-check" id="addTaskCheck" type="button"><svg viewBox="0 0 24 24"><polyline points="5 12 10 17 19 7"/></svg></button>
+            <textarea class="add-task-input" id="addTaskInput" placeholder='انقر مفتاح "إدخال" لإنشاء مهام فرعية بعد هذه' rows="1"></textarea>
+        </div>
+        <div class="add-task-footer">
+            <button class="add-task-yes" id="addTaskYes" type="button">تم</button>
+            <button class="add-task-reminder" id="addTaskReminder" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                تعيين تذكير
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ Bottom Sheet للإبلاغ -->
+<div class="report-backdrop" id="reportBackdrop"></div>
+<div class="report-screen" id="reportScreen">
+    <div class="report-handle-wrap" id="reportHandleWrap">
+        <div class="report-handle"></div>
+    </div>
+    <div class="report-body">
+        <div class="report-title">الإبلاغ عن خطأ</div>
+        <div class="report-label">ماذا حدث؟</div>
+        <div class="report-textarea-wrap">
+            <textarea class="report-textarea" id="reportTextarea" placeholder="أخبرنا عن المشكلة التي واجهتها" maxlength="2000"></textarea>
+        </div>
+        <div class="report-counter"><span id="reportCount">0</span> / 2000</div>
+        <div class="report-info">يمكن استخدام ملاحظاتك لتحسين NawaAI Studio. <span class="link">تعرف على المزيد.</span></div>
+        <div class="report-divider"></div>
+        <div class="report-toggle-row">
+            <label class="switch"><input type="checkbox" id="reportHaptic" checked><span class="slider"></span></label>
+            <div class="report-toggle-info">
+                <div class="report-toggle-title">هز الهاتف للإبلاغ عن خطأ</div>
+                <div class="report-toggle-sub">قم بتبديل المفتاح إلى غير مفعّل للتعطيل</div>
+            </div>
+        </div>
+        <button class="report-send-btn" id="reportSendBtn" type="button">إرسال</button>
+    </div>
+</div>
+
+<input type="file" id="imageFileInput"  accept="image/*" style="display:none">
+<input type="file" id="videoFileInput"  accept="video/*" style="display:none">
+<input type="file" id="photoCaptureInput" accept="image/*" style="display:none">
+<input type="file" id="refFaceInput"     accept="image/*" style="display:none">
+<input type="file" id="refFullFaceInput" accept="image/*" style="display:none"><div class="library-overlay" id="libraryOverlay">
+    <div class="library-modal">
+        <div class="library-header">
+            <div class="spacer" style="width:36px;visibility:hidden;"></div>
+            <h3>المكتبة</h3>
+            <button class="back-btn" id="closeLibrary" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg></button>
+        </div>
+        <div class="library-tabs">
+            <button class="library-tab active" data-tab="images" type="button">صور</button>
+            <button class="library-tab" data-tab="videos" type="button">فيديوهات</button>
+        </div>
+        <div class="library-content" id="libraryContent"></div>
+    </div>
+</div>
+
+<div class="settings-overlay" id="settingsOverlay">
+    <div class="settings-modal">
+        <div class="settings-screen active" id="screen-main">
+            <div class="settings-topbar">
+                <div class="spacer" style="width:36px;visibility:hidden;"></div>
+                <h2>الإعدادات</h2>
+                <button class="back-btn" id="closeSettings" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg></button>
+            </div>
+
+            <div class="settings-group">
+                <button class="setting-item" data-open="custom" type="button">
+                    <div class="right"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg></span><span class="label">التخصيص</span></div>
+                    <div class="left"><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></div>
+                </button>
+                <button class="setting-item" data-open="memory" type="button">
+                    <div class="right"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 14l9 5 9-5"/></svg></span><span class="label">الذاكرة</span></div>
+                    <div class="left"><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></div>
+                </button>
+                <button class="setting-item" data-open="extensions" type="button">
+                    <div class="right"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="9" r="2.5"/><circle cx="15" cy="15" r="2.5"/><circle cx="15" cy="9" r="2.5"/><circle cx="9" cy="15" r="2.5"/></svg></span><span class="label">المكونات الإضافية</span></div>
+                    <div class="left"><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></div>
+                </button>
+                <button class="setting-item" data-open="account" type="button">
+                    <div class="right"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 7l9 6 9-6"/></svg></span><span class="label">الحساب</span></div>
+                    <div class="left"><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></div>
+                </button>
+            </div>
+
+            <div class="settings-subheader">المظهر والإعدادات العامة</div>
+            <div class="settings-group">
+                <button class="setting-item" data-open="theme" type="button">
+                    <div class="right"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></span><span class="label">المظهر</span></div>
+                    <div class="left"><span class="value" id="valTheme">ليلي</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></div>
+                </button>
+                <button class="setting-item" data-open="language" type="button">
+                    <div class="right"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><ellipse cx="12" cy="12" rx="4" ry="9"/></svg></span><span class="label">اللغة</span></div>
+                    <div class="left"><span class="value" id="valLanguage">العربية</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></div>
+                </button>
+                <button class="setting-item" data-open="font" type="button">
+                    <div class="right"><span class="icon aa">Aa</span><span class="label">حجم الخط</span></div>
+                    <div class="left"><span class="value" id="valFont">متوسط</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></div>
+                </button>
+                <button class="setting-item" data-open="sound" type="button">
+                    <div class="right"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8a5 5 0 010 8"/></svg></span><span class="label">الصوت</span></div>
+                    <div class="left"><span class="value" id="valSound">Live</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></div>
+                </button>
+            </div>
+
+            <div class="settings-subheader">الترقية والإشعارات</div>
+            <div class="settings-group">
+                <button class="setting-item" data-open="upgrade" type="button">
+                    <div class="right"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3l2.5 5.5L20 10l-4 4 1 5.5L12 17l-5 2.5 1-5.5-4-4 5.5-1.5z"/></svg></span><span class="label">الترقية</span></div>
+                    <div class="left"><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></div>
+                </button>
+                <button class="setting-item" data-open="notif" type="button">
+                    <div class="right"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 16V10a6 6 0 1112 0v6l2 2H4l2-2z"/><path d="M10 20a2 2 0 004 0"/></svg></span><span class="label">الإشعارات</span></div>
+                    <div class="left"><span class="value" id="valNotif">مفعّلة</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></div>
+                </button>
+                <button class="setting-item" id="openReportBtn" type="button">
+                    <div class="right"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span><span class="label">الإبلاغ عن خطأ</span></div>
+                    <div class="left"><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></div>
+                </button>
+                <button class="setting-item danger" id="logoutBtn" type="button">
+                    <div class="right"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><path d="M10 17l-5-5 5-5M5 12h12"/></svg></span><span class="label">تسجيل الخروج</span></div>
+                    <div class="left"><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></div>
+                </button>
+            </div>
+        </div>
+
+        <div class="settings-screen" id="screen-extensions">
+            <div class="subpage-header"><div class="spacer"></div><h3>المكونات الإضافية</h3>
+                <button class="back-btn" data-back type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg></button>
+            </div>
+            <div class="ext-card" data-open="pinned"><div class="ext-info"><div class="ext-title">الدردشات المثبتة</div><div class="ext-sub">المحفوظة في الأعلى</div></div><div class="ext-right"><div class="ext-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 3l5 5-4 1-4 4-1 5-2-2-4 4-2 2 2-2 4-4-2-2 5-1 4-4 1-4z"/></svg></div><span class="ext-value" id="pinnedCount">0</span><svg class="ext-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></div></div>
+            <div class="ext-card" data-open="archive"><div class="ext-info"><div class="ext-title">الأرشيف</div><div class="ext-sub">الدردشات المؤرشفة</div></div><div class="ext-right"><div class="ext-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 001 1h12a1 1 0 001-1V8"/><path d="M10 12h4"/></svg></div><span class="ext-value" id="archiveCount">0</span><svg class="ext-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></div></div>
+            <div class="ext-card" data-open="savedProjects"><div class="ext-info"><div class="ext-title">المشاريع المحفوظة</div><div class="ext-sub">جميع مشاريعك</div></div><div class="ext-right"><div class="ext-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><span class="ext-value" id="projectsCount">0</span><svg class="ext-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></div></div>
+            <div class="ext-card" data-open="permissions"><div class="ext-info"><div class="ext-title">الأذونات</div><div class="ext-sub">إدارة الأذونات</div></div><div class="ext-right"><div class="ext-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></div><svg class="ext-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></div></div>
+            <div class="ext-card" data-open="safety"><div class="ext-info"><div class="ext-title">السلامة والرفاهية</div><div class="ext-sub">إعدادات السلامة</div></div><div class="ext-right"><div class="ext-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 21s-7-4.5-7-10a4 4 0 017-2.5A4 4 0 0119 11c0 5.5-7 10-7 10z"/></svg></div><svg class="ext-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></div></div>
+            <div class="ext-card" data-open="version"><div class="ext-info"><div class="ext-title">إصدار التطبيق</div><div class="ext-sub">معلومات الإصدار</div></div><div class="ext-right"><span class="ext-value" id="versionValue">1.0.0</span><svg class="ext-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></div></div>
+            <div class="ext-card" data-open="rating"><div class="ext-info"><div class="ext-title">تقييم التطبيق</div><div class="ext-sub">شاركنا رأيك</div></div><div class="ext-right"><div class="ext-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3l2.5 5.5L20 10l-4 4 1 5.5L12 17l-5 2.5 1-5.5-4-4 5.5-1.5z"/></svg></div><svg class="ext-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></div></div>
+        </div>
+
+        <div class="settings-screen" id="screen-pinned"><div class="subpage-header"><div class="spacer"></div><h3>الدردشات المثبتة</h3><button class="back-btn" data-back-to="extensions" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg></button></div><div id="pinnedList"></div></div>
+        <div class="settings-screen" id="screen-archive"><div class="subpage-header"><div class="spacer"></div><h3>الأرشيف</h3><button class="back-btn" data-back-to="extensions" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg></button></div><div id="archiveList"></div></div>
+        <div class="settings-screen" id="screen-savedProjects"><div class="subpage-header"><div class="spacer"></div><h3>المشاريع المحفوظة</h3><button class="back-btn" data-back-to="extensions" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg></button></div><div id="savedProjectsList"></div></div>
+
+        <div class="settings-screen" id="screen-permissions">
+            <div class="subpage-header"><div class="spacer"></div><h3>الأذونات</h3><button class="back-btn" data-back-to="extensions" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg></button></div>
+            <div class="perm-radio-card" data-perm-mode="always"><div class="perm-radio-circle"></div><div class="perm-radio-content"><div class="perm-radio-title">اسأل دائمًا</div><div class="perm-radio-desc">سيطلب الإذن.</div></div></div>
+            <div class="perm-radio-card" data-perm-mode="read"><div class="perm-radio-circle"></div><div class="perm-radio-content"><div class="perm-radio-title">إجراءات القراءة</div><div class="perm-radio-desc">قراءة بدون إذن.</div></div></div>
+            <div class="perm-radio-card selected" data-perm-mode="low"><div class="perm-radio-circle"></div><div class="perm-radio-content"><div class="perm-radio-title">منخفضة المخاطر</div><div class="perm-radio-desc">موافقة تلقائية.</div></div></div>
+            <div class="perm-bottom-note">اختر متى يجب أن يطلب الإذن.</div>
+        </div>
+
+        <div class="settings-screen" id="screen-safety">
+            <div class="subpage-header"><div class="spacer"></div><h3>السلامة والرفاهية</h3><button class="back-btn" data-back-to="extensions" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg></button></div>
+            <div class="custom-toggle-row"><div class="toggle-info"><div class="toggle-title">المحتوى الآمن</div></div><label class="switch"><input type="checkbox" id="safeContent" checked><span class="slider"></span></label></div>
+            <div class="custom-toggle-row"><div class="toggle-info"><div class="toggle-title">تذكير بفترات الراحة</div></div><label class="switch"><input type="checkbox" id="breakReminder" checked><span class="slider"></span></label></div>
+            <div class="custom-toggle-row"><div class="toggle-info"><div class="toggle-title">حماية البيانات</div></div><label class="switch"><input type="checkbox" id="dataProtection" checked><span class="slider"></span></label></div>
+            <button class="primary-btn" id="reportBtn" type="button">إبلاغ عن محتوى</button>
+        </div>
+
+        <div class="settings-screen" id="screen-version"><div class="subpage-header"><div class="spacer"></div><h3>إصدار التطبيق</h3><button class="back-btn" data-back-to="extensions" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg></button></div><div class="app-info-card"><div class="app-logo">N</div><h3>NawaAI Studio</h3><p>الإصدار 1.0.0</p></div><button class="primary-btn" id="checkUpdateBtn" type="button">التحقق من التحديثات</button></div>
+
+        <div class="settings-screen" id="screen-rating">
+            <div class="subpage-header"><div class="spacer"></div><h3>تقييم التطبيق</h3><button class="back-btn" data-back-to="extensions" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg></button></div>
+            <div class="rating-stars" id="ratingStars">
+                <span class="star" data-value="1"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7.5.6-5.7 4.9 1.7 7.3L12 17.8 5.5 21.8l1.7-7.3L1.5 9.6 9 9z"/></svg></span>
+                <span class="star" data-value="2"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7.5.6-5.7 4.9 1.7 7.3L12 17.8 5.5 21.8l1.7-7.3L1.5 9.6 9 9z"/></svg></span>
+                <span class="star" data-value="3"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7.5.6-5.7 4.9 1.7 7.3L12 17.8 5.5 21.8l1.7-7.3L1.5 9.6 9 9z"/></svg></span>
+                <span class="star" data-value="4"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7.5.6-5.7 4.9 1.7 7.3L12 17.8 5.5 21.8l1.7-7.3L1.5 9.6 9 9z"/></svg></span>
+                <span class="star" data-value="5"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7.5.6-5.7 4.9 1.7 7.3L12 17.8 5.5 21.8l1.7-7.3L1.5 9.6 9 9z"/></svg></span>
+            </div>
+            <div class="rating-text" id="ratingText">اختر عدد النجوم</div>
+            <textarea class="rating-feedback" id="ratingFeedback" placeholder="شاركنا رأيك (اختياري)"></textarea>
+            <button class="primary-btn" id="submitRatingBtn" type="button">إرسال التقييم</button>
+        </div>        <div class="settings-screen" id="screen-sound">
+            <div class="subpage-header"><div class="spacer"></div><h3>الصوت</h3><button class="back-btn" data-back type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg></button></div>
+            <div class="voice-cards">
+                <div class="voice-card selected" data-voice="mira"><div class="voice-image mira"></div><div class="voice-name">Mira</div><div class="voice-desc">Versatile</div></div>
+                <div class="voice-card" data-voice="echo"><div class="voice-image echo"></div><div class="voice-name">Echo</div><div class="voice-desc">Bright</div></div>
+                <div class="voice-card" data-voice="stella"><div class="voice-image stella"></div><div class="voice-name">Stella</div><div class="voice-desc">Sweet</div></div>
+            </div>
+            <div class="voice-row" id="voiceModelRow"><div class="voice-row-info"><div class="voice-row-title">النموذج</div><div class="voice-row-sub" id="voiceModelValue">Live</div></div><svg class="voice-row-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></div>
+            <div class="voice-dropdown" id="modelDropdown">
+                <button class="voice-dropdown-item active" data-model="Live" type="button"><span>Live</span><span class="dd-check">✓</span></button>
+                <button class="voice-dropdown-item" data-model="Standard" type="button"><span>Standard</span><span class="dd-check">✓</span></button>
+                <button class="voice-dropdown-item" data-model="Advanced" type="button"><span>Advanced</span><span class="dd-check">✓</span></button>
+            </div>
+            <div class="voice-row" id="voiceLangRow"><div class="voice-row-info"><div class="voice-row-title">اللغة</div><div class="voice-row-sub" id="voiceLangValue">Auto-detect</div></div><svg class="voice-row-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></div>
+            <div class="voice-dropdown" id="langDropdown">
+                <button class="voice-dropdown-item active" data-lang="auto" type="button"><span>Auto-detect</span><span class="dd-check">✓</span></button>
+                <button class="voice-dropdown-item" data-lang="ar" type="button"><span>العربية</span><span class="dd-check">✓</span></button>
+                <button class="voice-dropdown-item" data-lang="en" type="button"><span>English</span><span class="dd-check">✓</span></button>
+                <button class="voice-dropdown-item" data-lang="fr" type="button"><span>Français</span><span class="dd-check">✓</span></button>
+                <button class="voice-dropdown-item" data-lang="tr" type="button"><span>Türkçe</span><span class="dd-check">✓</span></button>
+            </div>
+            <div class="voice-row" id="voiceHistoryRow"><div class="voice-row-info"><div class="voice-row-title">سجل الإملاء</div><div class="voice-row-sub" id="dictationCountLabel">لا يوجد سجل</div></div><svg class="voice-row-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></div>
+            <div class="voice-row toggle-row"><div class="voice-row-info"><div class="voice-row-title">المحادثات في الخلفية</div></div><label class="switch"><input type="checkbox" id="voiceBackground" checked><span class="slider"></span></label></div>
+            <div class="voice-row toggle-row"><div class="voice-row-info"><div class="voice-row-title">الاستخدام كمساعد افتراضي</div></div><label class="switch"><input type="checkbox" id="voiceAssistant"><span class="slider"></span></label></div>
+        </div>
+
+        <div class="settings-screen" id="screen-dictation"><div class="subpage-header"><div class="spacer"></div><h3>سجل الإملاء</h3><button class="back-btn" data-back-to="sound" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg></button></div><div id="dictationList"></div><button class="dictation-clear-btn" id="clearDictationBtn" type="button" style="display:none;">مسح كل السجل</button></div>
+
+        <div class="settings-screen" id="screen-custom">
+            <div class="subpage-header"><div class="spacer"></div><h3>التخصيص</h3><button class="back-btn" data-back type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg></button></div>
+            <div class="custom-section" id="secReference"><div class="custom-section-header" data-toggle="secReference"><span class="custom-section-title">الصور المرجعية</span><span class="custom-section-right"><span class="custom-section-value" id="refStatusText">إضافة</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></span></div>
+                <div class="custom-section-body"><div class="ref-photo-row">
+                    <div class="ref-photo-card" id="refFaceCard"><div class="ref-info"><div class="ref-info-title">صورة الوجه</div></div><div class="ref-photo-thumb" id="refFaceThumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/></svg></div></div>
+                    <div class="ref-photo-card" id="refFullFaceCard"><div class="ref-info"><div class="ref-info-title">صورة الوجه كاملة</div></div><div class="ref-photo-thumb" id="refFullFaceThumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="4"/><path d="M6 21v-1a6 6 0 016-6 6 6 0 016 6v1"/></svg></div></div>
+                </div></div>
+            </div>
+            <div class="custom-toggle-row"><div class="toggle-info"><div class="toggle-title">إجابات سريعة</div></div><label class="switch"><input type="checkbox" id="fastAnswersToggle"><span class="slider"></span></label></div>
+            <div class="custom-note" style="padding:6px 8px;color:#8e8e93;">التعليمات المخصصة</div>
+            <textarea class="custom-textarea" id="customInstructions" placeholder="صِف السمات"></textarea>
+        </div>
+
+        <div class="settings-screen" id="screen-memory">
+            <div class="subpage-header"><div class="spacer"></div><h3>الذاكرة</h3><button class="back-btn" data-back type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg></button></div>
+            <div class="mem-toggle-row"><span class="mem-title">تفعيل الذاكرة</span><label class="switch"><input type="checkbox" id="memoryToggle" checked><span class="slider"></span></label></div>
+            <label class="mem-label">اسمك المستعار</label>
+            <textarea class="mem-input small" id="memoryNickname" placeholder="الاسم المفضل"></textarea>
+            <label class="mem-label">مهنتك</label>
+            <textarea class="mem-input small" id="memoryProfession" placeholder="مهندس، طالب..."></textarea>
+            <label class="mem-label">المزيد عنك</label>
+            <textarea class="mem-input" id="memoryAbout" placeholder="الاهتمامات"></textarea>
+        </div>
+
+        <div class="settings-screen" id="screen-language"><div class="subpage-header"><div class="spacer"></div><h3>اللغة</h3><button class="back-btn" data-back type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg></button></div><div class="options-list" id="langOptions"><button class="option-item active" data-lang="ar" type="button">العربية <span class="check">✓</span></button><button class="option-item" data-lang="en" type="button">English <span class="check">✓</span></button><button class="option-item" data-lang="fr" type="button">Français <span class="check">✓</span></button><button class="option-item" data-lang="tr" type="button">Türkçe <span class="check">✓</span></button></div></div>
+
+        <div class="settings-screen" id="screen-theme"><div class="subpage-header"><div class="spacer"></div><h3>المظهر</h3><button class="back-btn" data-back type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg></button></div><div class="options-list" id="themeOptions"><button class="option-item" data-theme="light" type="button">نهاري <span class="check">✓</span></button><button class="option-item active" data-theme="dark" type="button">ليلي <span class="check">✓</span></button></div></div>
+
+        <div class="settings-screen" id="screen-font"><div class="subpage-header"><div class="spacer"></div><h3>حجم الخط</h3><button class="back-btn" data-back type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg></button></div>
+            <div class="font-page-card"><div class="font-page-header"><div class="font-page-title">حجم النص</div><button class="font-page-reset" id="fontReset" type="button"><span class="reset-ico">↺</span> إعادة تعيين</button></div><div class="font-page-preview-btn">معاينة حجم النص</div><div class="font-page-preview-box">استخدم شريط التمرير لتغيير حجم النص.</div><div class="font-slider-wrap"><div class="font-slider-label small">A</div><input type="range" class="font-slider" id="fontSlider" min="0" max="4" step="1" value="2"><div class="font-slider-label">A</div></div></div>
+        </div>
+
+        <div class="settings-screen" id="screen-upgrade"><div class="subpage-header"><div class="spacer"></div><h3>الترقية</h3><button class="back-btn" data-back type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg></button></div><div class="upgrade-hero"><div class="crown">👑</div><h4>NawaAI Studio Pro</h4><p>ميزات متقدمة</p></div><button class="primary-btn" id="upgradeNowBtn" type="button">ترقية الآن</button></div>
+
+        <div class="settings-screen" id="screen-notif"><div class="subpage-header"><div class="spacer"></div><h3>الإشعارات</h3><button class="back-btn" data-back type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg></button></div><div class="options-list" id="notifOptions"><button class="option-item active" data-notif="on" type="button">مفعّلة <span class="check">✓</span></button><button class="option-item" data-notif="off" type="button">معطّلة <span class="check">✓</span></button></div></div>
+
+        <div class="settings-screen" id="screen-account">
+            <div class="subpage-header"><div class="spacer"></div><h3>الحساب</h3><button class="back-btn" data-back type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg></button></div>
+            <div class="account-card"><div class="account-avatar" id="accountAvatar">N</div><div class="account-email" id="accountEmailDisplay">name@example.com</div><div class="account-status">متصل</div></div>
+            <div class="account-email-input-wrap"><label class="input-label">البريد الإلكتروني</label><input type="email" class="input-field" id="inputEmail" placeholder="name@example.com"></div>
+            <button class="primary-btn" id="saveEmailBtn" type="button" style="margin-bottom:14px;">حفظ البريد</button>
+            <div class="account-actions">
+                <button class="account-action-btn" id="switchAccountBtn" type="button"><div class="acc-info"><div class="acc-title">تبديل الحساب</div><div class="acc-sub">تسجيل الدخول بحساب آخر</div></div><div class="acc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 3l4 4-4 4"/><path d="M20 7H8a4 4 0 000 8h2"/><path d="M8 21l-4-4 4-4"/><path d="M4 17h12a4 4 0 000-8h-2"/></svg></div></button>
+                <button class="account-action-btn" id="manageAccountBtn" type="button"><div class="acc-info"><div class="acc-title">إدارة الحساب</div><div class="acc-sub">الأمان والخصوصية</div></div><div class="acc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/></svg></div></button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="toast" id="toast">تم الحفظ</div>
+
+</div><script>
+function $(id){ return document.getElementById(id); }
+function addClass(el, cls){ if(el) el.classList.add(cls); }
+function removeClass(el, cls){ if(el) el.classList.remove(cls); }
+
+function showToast(text){
+    var t = $("toast"); if(!t) return;
+    t.textContent = text; addClass(t, "show");
+    if(showToast._timer) clearTimeout(showToast._timer);
+    showToast._timer = setTimeout(function(){ removeClass(t, "show"); }, 1700);
+}
+
+var STORAGE_KEY = "nawa_studio_state_v11";
+
+function saveState(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        settings: settings, chatHistory: chatHistory, currentChatId: currentChatId,
+        dictationHistory: dictationHistory, projects: projects, tasks: tasks
+    })); }catch(e){}
+}
+function loadState(){
+    try{
+        var raw = localStorage.getItem(STORAGE_KEY); if(!raw) return false;
+        var data = JSON.parse(raw);
+        if(data.settings) Object.assign(settings, data.settings);
+        if(Array.isArray(data.chatHistory)) chatHistory = data.chatHistory;
+        if(data.currentChatId) currentChatId = data.currentChatId;
+        if(Array.isArray(data.dictationHistory)) dictationHistory = data.dictationHistory;
+        if(Array.isArray(data.projects)) projects = data.projects;
+        if(Array.isArray(data.tasks)) tasks = data.tasks;
+        return true;
+    }catch(e){ return false; }
+}
+
+var input=$("messageInput"), sendBtn=$("sendBtn"), micBtn=$("micBtn");
+var chatArea=$("chatArea"), welcome=$("welcome"), typing=$("typing");
+var newChatBtn=$("newChatBtn"), themeBtn=$("themeBtn"), menuBtn=$("menuBtn");
+var sidebar=$("sidebar"), sidebarOverlay=$("sidebarOverlay");
+var createBtn=$("createBtn"), createModal=$("createModal");
+var videoBtn=$("videoBtn"), imageBtn=$("imageBtn"), cameraBtn=$("cameraBtn");
+var startNewSideBtn=$("startNewSideBtn"), sidebarSearch=$("sidebarSearch"), searchResults=$("searchResults");
+var settingsOverlay=$("settingsOverlay"), openSettingsBtn=$("openSettingsBtn"), closeSettings=$("closeSettings");
+var libraryOverlay=$("libraryOverlay"), openLibraryBtn=$("openLibraryBtn"), closeLibrary=$("closeLibrary"), libraryContent=$("libraryContent");
+var chatHistoryList=$("chatHistoryList");
+var newProjectBtn=$("newProjectBtn"), notepadBtn=$("notepadBtn"), openImagesBtn=$("openImagesBtn");
+var chatContextMenu=$("chatContextMenu"), projectMenu=$("projectMenu");
+var newProjectScreen=$("newProjectScreen"), tasksScreen=$("tasksScreen");
+var addTaskScreen=$("addTaskScreen"), reportScreen=$("reportScreen"), reportBackdrop=$("reportBackdrop");
+var voiceListenScreen=$("voiceListenScreen");
+var aiMenu=$("aiMenu"), menuSearchWeb=$("menuSearchWeb"), menuRetry=$("menuRetry");
+
+var sending=false, audioCtx=null, lastUserMessage="", activeMessageWrap=null, contextChatId=null;
+
+var settings = {
+    email:"", language:"ar", theme:"dark",
+    fontScale:2, sound:true, notif:true,
+    refFaceData:null, refFullFaceData:null,
+    fastAnswers:false, customInstructions:"",
+    memoryEnabled:true, memoryNickname:"", memoryProfession:"", memoryAbout:"",
+    permMode:"low", safeContent:true, breakReminder:true, dataProtection:true,
+    userRating:0, userFeedback:"",
+    voice:"mira", voiceModel:"Live", voiceLang:"auto",
+    voiceBackground:true, voiceAssistant:false
+};
+
+var chatHistory=[], currentChatId=null, libraryImages=[], libraryVideos=[], dictationHistory=[], projects=[], tasks=[];
+
+var VOICE_LANG_LABELS = { auto:"Auto-detect", ar:"العربية", en:"English", fr:"Français", tr:"Türkçe" };
+var FONT_SCALES = [
+    { name:"صغير جدًا", scale:0.8 },{ name:"صغير", scale:0.9 },{ name:"متوسط", scale:1.0 },
+    { name:"كبير", scale:1.15 },{ name:"كبير جدًا", scale:1.3 }
+];
+
+function applyFontScale(){
+    var s = FONT_SCALES[settings.fontScale] || FONT_SCALES[2];
+    document.documentElement.style.setProperty("--scale", s.scale);
+    var vf = $("valFont"); if(vf) vf.textContent = s.name;
+    updateSliderFill();
+}
+function updateSliderFill(){
+    var slider = $("fontSlider"); if(!slider) return;
+    var min=+slider.min, max=+slider.max, val=+slider.value;
+    var pct = ((max-val)/(max-min))*100;
+    slider.style.background = "linear-gradient(to left, #c7c7cc 0%, #c7c7cc " + pct + "%, #e5e5ea " + pct + "%, #e5e5ea 100%)";
+}
+function applyTheme(theme){
+    if(theme==="light") document.body.classList.add("light");
+    else document.body.classList.remove("light");
+}
+function markActive(selector, dataAttr, value){
+    var root = document.querySelector(selector); if(!root) return;
+    var items = root.querySelectorAll(".option-item");
+    for(var i=0; i<items.length; i++){
+        items[i].classList.toggle("active", items[i].getAttribute("data-"+dataAttr)===value);
+    }
+}
+function applySettings(){
+    applyFontScale(); applyTheme(settings.theme);
+    document.documentElement.lang = settings.language;
+    document.documentElement.dir = (settings.language==="ar") ? "rtl" : "ltr";
+    var vL=$("valLanguage"); if(vL) vL.textContent = ({ar:"العربية",en:"English",fr:"Français",tr:"Türkçe"})[settings.language] || "العربية";
+    var vT=$("valTheme");    if(vT) vT.textContent = ({light:"نهاري",dark:"ليلي"})[settings.theme] || "ليلي";
+    var vS=$("valSound");    if(vS) vS.textContent = settings.voiceModel || "Live";
+    var vN=$("valNotif");    if(vN) vN.textContent = settings.notif ? "مفعّلة" : "معطّلة";
+    var vM=$("voiceModelValue"); if(vM) vM.textContent = settings.voiceModel || "Live";
+    var vLang=$("voiceLangValue"); if(vLang) vLang.textContent = VOICE_LANG_LABELS[settings.voiceLang] || "Auto-detect";
+    markActive("#langOptions","lang",settings.language);
+    markActive("#themeOptions","theme",settings.theme);
+    markActive("#notifOptions","notif",settings.notif?"on":"off");
+    var slider=$("fontSlider"); if(slider) slider.value = settings.fontScale;
+    updateSliderFill(); renderReferenceThumbs(); updatePermSelection(); updateAccountDisplay();
+    updateVoiceCards(); updateModelDropdown(); updateLangDropdown();
+    updateDictationCountLabel(); updatePinnedArchiveCounts(); updateProjectsCount();
+}
+
+/* Sidebar */
+var sidebarOpen=false, touchStartX=0, touchStartY=0, touchCurrentX=0, touchCurrentY=0;
+var sidebarW=300, isDragging=false, tracking=false, startOffset=0;
+function openSidebar(){ sidebarOpen=true; addClass(sidebar,"active"); addClass(sidebarOverlay,"active"); sidebar.style.transform=""; }
+function closeSidebarFn(){
+    sidebarOpen=false; removeClass(sidebar,"active"); removeClass(sidebarOverlay,"active");
+    sidebar.style.transform=""; sidebarOverlay.style.opacity="";
+    hideSearchResults(); closeChatContextMenu(); closeProjectMenu();
+}
+function toggleSidebar(){ if(sidebarOpen) closeSidebarFn(); else openSidebar(); }
+menuBtn.addEventListener("click", toggleSidebar);
+sidebarOverlay.addEventListener("click", closeSidebarFn);
+
+document.addEventListener("touchstart", function(e){
+    if(e.touches.length!==1) return;
+    var t = e.touches[0];
+    touchStartX=t.clientX; touchStartY=t.clientY;
+    touchCurrentX=t.clientX; touchCurrentY=t.clientY;
+    sidebarW = sidebar.offsetWidth || 300; isDragging=false;
+    if(!sidebarOpen){ tracking=true; startOffset=sidebarW; }
+    else if(sidebar.contains(e.target)){ tracking=true; startOffset=0; }
+    else { tracking=false; }
+}, {passive:true});
+
+document.addEventListener("touchmove", function(e){
+    if(!tracking || e.touches.length!==1) return;
+    var t=e.touches[0];
+    touchCurrentX=t.clientX; touchCurrentY=t.clientY;
+    var dx=touchCurrentX-touchStartX, dy=touchCurrentY-touchStartY;
+    if(!isDragging && Math.abs(dy)>Math.abs(dx)){ tracking=false; return; }
+    if(!isDragging){
+        if(!sidebarOpen && dx<-6){
+            isDragging=true;
+            sidebar.classList.add("dragging"); sidebar.classList.add("active"); sidebarOverlay.classList.add("active");
+        } else if(sidebarOpen && dx>6){
+            isDragging=true; sidebar.classList.add("dragging");
+        } else return;
+    }
+    if(e.cancelable) e.preventDefault();
+    var offset = startOffset + dx;
+    if(offset<0) offset=0;
+    if(offset>sidebarW) offset=sidebarW;
+    sidebar.style.transform = "translateX(" + offset + "px)";
+    var op = 1 - (offset/sidebarW);
+    sidebarOverlay.style.opacity = String(Math.max(0, Math.min(1, op)));
+}, {passive:false});
+
+document.addEventListener("touchend", function(){
+    if(!tracking) return;
+    if(isDragging){
+        var dx = touchCurrentX - touchStartX;
+        sidebar.classList.remove("dragging"); sidebar.style.transition=""; sidebar.style.transform=""; sidebarOverlay.style.opacity="";
+        var half = sidebarW/2;
+        if(!sidebarOpen){ if(dx<=-half) openSidebar(); else closeSidebarFn(); }
+        else { if(dx>=half) closeSidebarFn(); else openSidebar(); }
+    }
+    tracking=false; isDragging=false;
+});
+
+function hideSearchResults(){ removeClass(searchResults,"active"); searchResults.innerHTML=""; }
+sidebarSearch.addEventListener("input", function(){});
+sidebarSearch.addEventListener("keydown", function(e){ if(e.key==="Enter") e.preventDefault(); });
+
+/* Chat List */
+var chatTouchTimer=null;
+function renderChatHistoryList(){
+    if(!chatHistoryList) return;
+    chatHistoryList.innerHTML = "";
+    var visibleChats = chatHistory.filter(function(c){ return !c.archived && !c.inProject; });
+    visibleChats.sort(function(a,b){
+        if(a.pinned && !b.pinned) return -1;
+        if(!a.pinned && b.pinned) return 1;
+        return (b.createdAt||0)-(a.createdAt||0);
+    });
+    if(visibleChats.length===0){
+        var empty=document.createElement("div");
+        empty.style.cssText="color:#cbd5e1;font-size:13px;padding:10px 8px;text-align:right;font-weight:600;";
+        empty.textContent="لا توجد محادثات سابقة";
+        chatHistoryList.appendChild(empty); return;
+    }
+    var limit=Math.min(visibleChats.length,30);
+    for(var i=0;i<limit;i++){
+        (function(chat){
+            var link=document.createElement("div"); link.className="sidebar-link";
+            var ico=document.createElement("span"); ico.className="ico";
+            ico.innerHTML = chat.pinned
+                ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M16 3l5 5-4 1-4 4-1 5-2-2-4 4-2 2 2-2 4-4-2-2 5-1 4-4 1-4z"/></svg>'
+                : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>';
+            var info=document.createElement("div"); info.className="chat-info";
+            var title=document.createElement("div"); title.className="chat-title"; title.textContent = chat.title || "محادثة";
+            var date=document.createElement("div"); date.className="chat-date";
+            var d = chat.createdAt ? new Date(chat.createdAt) : new Date();
+            date.textContent = d.toLocaleDateString("ar-EG",{day:"numeric",month:"short"});
+            info.appendChild(title); info.appendChild(date);
+            link.appendChild(ico); link.appendChild(info);
+            link.addEventListener("click", function(e){ if(link._skipClick) return; loadChatById(chat.id); closeSidebarFn(); });
+            link.addEventListener("touchstart", function(){
+                clearTimeout(chatTouchTimer);
+                chatTouchTimer = setTimeout(function(){
+                    chatTouchTimer=null; openChatContextMenu(chat.id, link); link._skipClick=true;
+                }, 500);
+            }, {passive:true});
+            link.addEventListener("touchend", function(e){
+                if(chatTouchTimer){ clearTimeout(chatTouchTimer); chatTouchTimer=null; }
+                if(link._skipClick){ link._skipClick=false; e.preventDefault(); }
+            });
+            link.addEventListener("touchmove", function(){
+                if(chatTouchTimer){ clearTimeout(chatTouchTimer); chatTouchTimer=null; }
+                link._skipClick=false;
+            });
+            link.addEventListener("contextmenu", function(e){ e.preventDefault(); openChatContextMenu(chat.id, link); });
+            chatHistoryList.appendChild(link);
+        })(visibleChats[i]);
+    }
+}
+function openChatContextMenu(chatId, anchorEl){
+    contextChatId = chatId;
+    var rect = anchorEl.getBoundingClientRect();
+    chatContextMenu.classList.add("active");
+    var menuW=240;
+    var left = rect.left - menuW + rect.width;
+    if(left<8) left=8;
+    if(left+menuW > window.innerWidth-8) left = window.innerWidth-menuW-8;
+    var top = rect.bottom + 6;
+    var menuH = chatContextMenu.offsetHeight || 280;
+    if(top+menuH > window.innerHeight-8){ top = rect.top - menuH - 6; if(top<8) top=8; }
+    chatContextMenu.style.left = left+"px"; chatContextMenu.style.top = top+"px";
+}
+function closeChatContextMenu(){ chatContextMenu.classList.remove("active"); contextChatId=null; }
+document.addEventListener("click", function(e){
+    if(chatContextMenu.classList.contains("active") && !chatContextMenu.contains(e.target)) closeChatContextMenu();
+});
+chatContextMenu.addEventListener("click", function(e){
+    var btn = e.target.closest(".chat-ctx-item"); if(!btn || !contextChatId) return;
+    var action = btn.getAttribute("data-action");
+    var chat=null;
+    for(var i=0;i<chatHistory.length;i++){ if(chatHistory[i].id===contextChatId){ chat=chatHistory[i]; break; } }
+    if(!chat){ closeChatContextMenu(); return; }
+    if(action==="pin"){ chat.pinned = !chat.pinned; showToast(chat.pinned?"📌":"تم إلغاء التثبيت"); }
+    else if(action==="rename"){ var n=prompt("الاسم الجديد:",chat.title); if(n&&n.trim()){ chat.title=n.trim(); showToast("✅"); } }
+    else if(action==="addToProject"){
+        if(projects.length===0){ showToast("⚠️ أنشئ مشروعًا أولاً"); closeChatContextMenu(); return; }
+        var pname = prompt("اسم المشروع:", projects[projects.length-1].name);
+        if(!pname || !pname.trim()){ closeChatContextMenu(); return; }
+        var targetProj = null;
+        for(var pi=0; pi<projects.length; pi++){ if(projects[pi].name === pname.trim()){ targetProj=projects[pi]; break; } }
+        if(!targetProj){ targetProj = { id:"proj_"+Date.now(), name:pname.trim(), chats:[], createdAt:Date.now() }; projects.push(targetProj); }
+        targetProj.chats.push({ id:chat.id, title:chat.title, messages:chat.messages, createdAt:chat.createdAt });
+        chat.inProject = true; chat.projectId = targetProj.id;
+        showToast("📂 " + targetProj.name);
+    }
+    else if(action==="archive"){ chat.archived=true; if(currentChatId===chat.id) resetChat(); showToast("📦"); }
+    else if(action==="delete"){ if(!confirm("حذف؟")){ closeChatContextMenu(); return; } var idx=chatHistory.indexOf(chat); if(idx>-1) chatHistory.splice(idx,1); if(currentChatId===chat.id) resetChat(); showToast("🗑️"); }
+    saveState(); renderChatHistoryList(); updatePinnedArchiveCounts(); updateProjectsCount();
+    closeChatContextMenu();
+});
+function updatePinnedArchiveCounts(){
+    var pC=0, aC=0;
+    for(var i=0;i<chatHistory.length;i++){
+        if(chatHistory[i].pinned && !chatHistory[i].archived && !chatHistory[i].inProject) pC++;
+        if(chatHistory[i].archived) aC++;
+    }
+    var pc=$("pinnedCount"); if(pc) pc.textContent=pC;
+    var ac=$("archiveCount"); if(ac) ac.textContent=aC;
+}
+function updateProjectsCount(){ var pc=$("projectsCount"); if(pc) pc.textContent=projects.length; }
+
+function renderPinnedList(){
+    var list=$("pinnedList"); if(!list) return; list.innerHTML="";
+    var items=chatHistory.filter(function(c){ return c.pinned && !c.archived && !c.inProject; });
+    if(items.length===0){ list.innerHTML='<div class="dictation-empty"><div class="ico-big">📌</div>لا توجد دردشات مثبتة.</div>'; return; }
+    for(var i=0;i<items.length;i++){ (function(chat){
+        var card=document.createElement("div"); card.className="mem-card";
+        var t=document.createElement("span"); t.className="mem-card-title"; t.textContent=chat.title;
+        var ch=document.createElement("svg"); ch.className="mem-chev"; ch.setAttribute("viewBox","0 0 24 24"); ch.setAttribute("fill","none"); ch.setAttribute("stroke","currentColor"); ch.setAttribute("stroke-width","2.4");
+        ch.innerHTML='<path d="M15 6l-6 6 6 6"/>';
+        card.appendChild(t); card.appendChild(ch);
+        card.addEventListener("click", function(){ removeClass(settingsOverlay,"active"); loadChatById(chat.id); });
+        list.appendChild(card);
+    })(items[i]); }
+}
+function renderArchiveList(){
+    var list=$("archiveList"); if(!list) return; list.innerHTML="";
+    var items=chatHistory.filter(function(c){ return c.archived; });
+    if(items.length===0){ list.innerHTML='<div class="dictation-empty"><div class="ico-big">📦</div>لا توجد دردشات مؤرشفة.</div>'; return; }
+    for(var i=0;i<items.length;i++){ (function(chat){
+        var card=document.createElement("div"); card.className="mem-card";
+        var t=document.createElement("span"); t.className="mem-card-title"; t.textContent=chat.title;
+        var ch=document.createElement("svg"); ch.className="mem-chev"; ch.setAttribute("viewBox","0 0 24 24"); ch.setAttribute("fill","none"); ch.setAttribute("stroke","currentColor"); ch.setAttribute("stroke-width","2.4");
+        ch.innerHTML='<path d="M15 6l-6 6 6 6"/>';
+        card.appendChild(t); card.appendChild(ch);
+        card.addEventListener("click", function(){ chat.archived=false; saveState(); renderChatHistoryList(); renderArchiveList(); updatePinnedArchiveCounts(); });
+        list.appendChild(card);
+    })(items[i]); }
+}
+function renderSavedProjectsList(){
+    var list=$("savedProjectsList"); if(!list) return; list.innerHTML="";
+    if(projects.length===0){ list.innerHTML='<div class="dictation-empty"><div class="ico-big">📂</div>لا توجد مشاريع محفوظة.</div>'; return; }
+    for(var i=0;i<projects.length;i++){ (function(proj){
+        var card=document.createElement("div"); card.className="project-item";
+        var info=document.createElement("div"); info.className="pj-info";
+        var name=document.createElement("div"); name.className="pj-name"; name.textContent=proj.name;
+        var count=document.createElement("div"); count.className="pj-count"; count.textContent = proj.chats.length + " محادثة";
+        var date=document.createElement("div"); date.className="pj-date";
+        var d = new Date(proj.createdAt); date.textContent = d.toLocaleDateString("ar-EG");
+        info.appendChild(name); info.appendChild(count); info.appendChild(date);
+        var ch=document.createElement("svg"); ch.className="pj-chev"; ch.setAttribute("viewBox","0 0 24 24"); ch.setAttribute("fill","none"); ch.setAttribute("stroke","currentColor"); ch.setAttribute("stroke-width","2.4");
+        ch.innerHTML='<path d="M15 6l-6 6 6 6"/>';
+        card.appendChild(ch); card.appendChild(info);
+        card.addEventListener("click", function(){
+            if(proj.chats.length===0){ showToast("لا توجد محادثات"); return; }
+            var lastChat = proj.chats[proj.chats.length-1];
+            removeClass(settingsOverlay,"active");
+            currentChatId = lastChat.id;
+            chatArea.innerHTML=""; welcome.style.display="none"; chatArea.style.display="flex";
+            for(var j=0;j<lastChat.messages.length;j++) addMessage(lastChat.messages[j].text, lastChat.messages[j].type, false);
+        });
+        list.appendChild(card);
+    })(projects[i]); }
+}
+
+function loadChatById(id){
+    var found=null;
+    for(var i=0;i<chatHistory.length;i++){ if(chatHistory[i].id===id){ found=chatHistory[i]; break; } }
+    if(!found) return;
+    currentChatId=id;
+    chatArea.innerHTML=""; welcome.style.display="none"; chatArea.style.display="flex";
+    for(var j=0;j<found.messages.length;j++) addMessage(found.messages[j].text, found.messages[j].type, false);
+    saveState();
+}
+
+function updateDictationCountLabel(){
+    var lbl=$("dictationCountLabel"); if(!lbl) return;
+    lbl.textContent = dictationHistory.length===0 ? "لا يوجد سجل" : dictationHistory.length + " تسجيل";
+}
+function renderDictationList(){
+    var list=$("dictationList"); var clearBtn=$("clearDictationBtn");
+    if(!list) return; list.innerHTML="";
+    if(dictationHistory.length===0){
+        list.innerHTML='<div class="dictation-empty"><div class="ico-big">🎤</div>لا يوجد سجل صوتي بعد.</div>';
+        if(clearBtn) clearBtn.style.display="none"; return;
+    }
+    if(clearBtn) clearBtn.style.display="block";
+    for(var i=dictationHistory.length-1; i>=0; i--){ (function(item,idx){
+        var card=document.createElement("div"); card.className="dictation-item";
+        var head=document.createElement("div"); head.className="dictation-head";
+        var date=document.createElement("div"); date.className="dictation-date";
+        var d=new Date(item.date);
+        date.textContent = d.toLocaleString("ar-EG",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+        var lang=document.createElement("div"); lang.className="dictation-lang";
+        lang.textContent = VOICE_LANG_LABELS[item.lang] || "Auto";
+        head.appendChild(lang); head.appendChild(date);
+        var text=document.createElement("div"); text.className="dictation-text"; text.textContent=item.text;
+        var actions=document.createElement("div"); actions.className="dictation-actions";
+        var useBtn=document.createElement("button"); useBtn.className="dictation-act"; useBtn.type="button";
+        useBtn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12l16-8-6 16-3-7z"/></svg> استخدام';
+        useBtn.addEventListener("click", function(){ input.value=item.text; addClass(sendBtn,"has-text"); removeClass(settingsOverlay,"active"); });
+        var delBtn=document.createElement("button"); delBtn.className="dictation-act delete"; delBtn.type="button";
+        delBtn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg> حذف';
+        delBtn.addEventListener("click", function(){ dictationHistory.splice(idx,1); saveState(); renderDictationList(); updateDictationCountLabel(); });
+        actions.appendChild(useBtn); actions.appendChild(delBtn);
+        card.appendChild(head); card.appendChild(text); card.appendChild(actions);
+        list.appendChild(card);
+    })(dictationHistory[i], i); }
+}
+var clearDictationBtn=$("clearDictationBtn");
+if(clearDictationBtn){
+    clearDictationBtn.addEventListener("click", function(){
+        if(!confirm("مسح كل السجل؟")) return;
+        dictationHistory=[]; saveState(); renderDictationList(); updateDictationCountLabel();
+    });
+}
+
+function openProjectMenu(anchorEl){
+    projectMenu.classList.add("active");
+    var rect = anchorEl.getBoundingClientRect();
+    var menuW=240;
+    var left = rect.left - menuW + rect.width;
+    if(left<8) left=8;
+    if(left+menuW > window.innerWidth-8) left = window.innerWidth-menuW-8;
+    var top = rect.bottom + 6;
+    if(top + 150 > window.innerHeight-8) top = rect.top - 150 - 6;
+    projectMenu.style.left = left+"px"; projectMenu.style.top = top+"px";
+}
+function closeProjectMenu(){ projectMenu.classList.remove("active"); }
+document.addEventListener("click", function(e){
+    if(projectMenu.classList.contains("active") && !projectMenu.contains(e.target)) closeProjectMenu();
+});
+projectMenu.addEventListener("click", function(e){
+    var btn=e.target.closest(".project-menu-item"); if(!btn) return;
+    var action = btn.getAttribute("data-action");
+    closeProjectMenu(); closeSidebarFn();
+    if(action==="newProject"){ openNewProjectScreen(); }
+    else if(action==="savedProjects"){ addClass(settingsOverlay,"active"); renderSavedProjectsList(); showScreen("savedProjects", false); }
+});function openNewProjectScreen(){
+    addClass(newProjectScreen,"active");
+    var inp=$("projectNameInput"); if(inp){ inp.value=""; inp.focus(); }
+    var btn=$("createProjectBtn"); if(btn) btn.classList.remove("enabled");
+}
+function closeNewProjectScreen(){ removeClass(newProjectScreen,"active"); }
+var closeNewProject=$("closeNewProject"); if(closeNewProject) closeNewProject.addEventListener("click", closeNewProjectScreen);
+var projectNameInput=$("projectNameInput"), createProjectBtn=$("createProjectBtn");
+if(projectNameInput){
+    projectNameInput.addEventListener("input", function(){
+        if(projectNameInput.value.trim().length>0) addClass(createProjectBtn,"enabled");
+        else removeClass(createProjectBtn,"enabled");
+    });
+}
+if(createProjectBtn){
+    createProjectBtn.addEventListener("click", function(){
+        var name = projectNameInput.value.trim(); if(!name) return;
+        projects.push({ id:"proj_"+Date.now(), name:name, chats:[], createdAt:Date.now() });
+        saveState(); updateProjectsCount(); closeNewProjectScreen();
+        showToast("✅ تم إنشاء المشروع");
+    });
+}
+
+function openTasksScreen(){ addClass(tasksScreen,"active"); renderTasksList(); }
+function closeTasksScreen(){ removeClass(tasksScreen,"active"); }
+function renderTasksList(){
+    var body=$("tasksBody"); if(!body) return; body.innerHTML="";
+    if(tasks.length===0){
+        body.innerHTML = '<div class="tasks-empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="14" height="16" rx="2"/><path d="M7 9h6M7 13h6"/><path d="M15 10l1.5 1.5L21 7"/><path d="M15 16l1.5 1.5L21 13"/></svg></div><div class="tasks-empty-text">لا توجد مهام بعد</div>';
+        return;
+    }
+    for(var i=0;i<tasks.length;i++){
+        var t=document.createElement("div"); t.className="dictation-item";
+        t.textContent = tasks[i].text; body.appendChild(t);
+    }
+}
+var tasksBack = $("tasksBack");
+if(tasksBack) tasksBack.addEventListener("click", function(){ closeTasksScreen(); closeSidebarFn(); });
+
+function openAddTaskScreen(){
+    addClass(addTaskScreen,"active");
+    var inp = $("addTaskInput"); if(inp){ inp.value=""; inp.style.height="auto"; inp.focus(); }
+    var chk = $("addTaskCheck"); if(chk) removeClass(chk,"checked");
+}
+function closeAddTaskScreen(){ removeClass(addTaskScreen,"active"); }
+var addTaskBtn=$("addTaskBtn");
+if(addTaskBtn) addTaskBtn.addEventListener("click", openAddTaskScreen);
+var addTaskCheck=$("addTaskCheck");
+if(addTaskCheck) addTaskCheck.addEventListener("click", function(){ addTaskCheck.classList.toggle("checked"); });
+var addTaskInput=$("addTaskInput");
+if(addTaskInput){
+    addTaskInput.addEventListener("input", function(){
+        addTaskInput.style.height = "auto";
+        addTaskInput.style.height = addTaskInput.scrollHeight + "px";
+    });
+    addTaskInput.addEventListener("keydown", function(e){
+        if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); saveTaskFromAdd(); }
+    });
+}
+var addTaskYes=$("addTaskYes");
+if(addTaskYes) addTaskYes.addEventListener("click", saveTaskFromAdd);
+function saveTaskFromAdd(){
+    var text = addTaskInput ? addTaskInput.value.trim() : "";
+    if(!text){ closeAddTaskScreen(); return; }
+    tasks.push({ text:text, done:false, createdAt:Date.now() });
+    saveState(); renderTasksList(); closeAddTaskScreen();
+    showToast("✅ تمت الإضافة");
+}
+var addTaskReminder=$("addTaskReminder");
+if(addTaskReminder) addTaskReminder.addEventListener("click", function(){ showToast("⏰"); });
+
+/* Bottom Sheet للإبلاغ */
+var reportTextarea = $("reportTextarea");
+var reportCount = $("reportCount");
+var reportSendBtn = $("reportSendBtn");
+var reportHandleWrap = $("reportHandleWrap");
+
+function openReportScreen(){
+    addClass(reportBackdrop, "active");
+    addClass(reportScreen, "active");
+    reportScreen.style.transform = "";
+    if(reportTextarea){ reportTextarea.value = ""; reportTextarea.focus(); }
+    if(reportCount) reportCount.textContent = "0";
+    if(reportSendBtn) removeClass(reportSendBtn, "enabled");
+}
+function closeReportScreen(){
+    removeClass(reportBackdrop, "active");
+    removeClass(reportScreen, "active");
+    reportScreen.style.transform = "";
+    reportScreen.classList.remove("dragging");
+}
+var openReportBtn = $("openReportBtn");
+if(openReportBtn) openReportBtn.addEventListener("click", function(){
+    removeClass(settingsOverlay, "active"); openReportScreen();
+});
+if(reportBackdrop) reportBackdrop.addEventListener("click", closeReportScreen);
+
+if(reportTextarea){
+    reportTextarea.addEventListener("input", function(){
+        var len = reportTextarea.value.length;
+        if(reportCount) reportCount.textContent = len;
+        if(len > 0) addClass(reportSendBtn, "enabled");
+        else removeClass(reportSendBtn, "enabled");
+    });
+}
+if(reportSendBtn){
+    reportSendBtn.addEventListener("click", function(){
+        if(!reportTextarea || !reportTextarea.value.trim()) return;
+        showToast("✅ تم إرسال البلاغ");
+        closeReportScreen();
+    });
+}
+
+var rDragStartY = 0;
+var rDragCurrentY = 0;
+var rDragging = false;
+
+if(reportHandleWrap){
+    reportHandleWrap.addEventListener("touchstart", function(e){
+        if(e.touches.length !== 1) return;
+        rDragStartY = e.touches[0].clientY;
+        rDragCurrentY = rDragStartY;
+        rDragging = true;
+        reportScreen.classList.add("dragging");
+    }, {passive:true});
+
+    document.addEventListener("touchmove", function(e){
+        if(!rDragging || e.touches.length !== 1) return;
+        rDragCurrentY = e.touches[0].clientY;
+        var dy = rDragCurrentY - rDragStartY;
+        if(dy < 0) dy = 0;
+        if(e.cancelable) e.preventDefault();
+        reportScreen.style.transform = "translateY(" + dy + "px)";
+    }, {passive:false});
+
+    document.addEventListener("touchend", function(){
+        if(!rDragging) return;
+        rDragging = false;
+        reportScreen.classList.remove("dragging");
+        var dy = rDragCurrentY - rDragStartY;
+        var screenH = reportScreen.offsetHeight || 400;
+        if(dy > screenH * 0.3){
+            reportScreen.style.transform = "";
+            closeReportScreen();
+        } else {
+            reportScreen.style.transform = "";
+        }
+    });
+
+    reportHandleWrap.addEventListener("mousedown", function(e){
+        rDragStartY = e.clientY;
+        rDragCurrentY = rDragStartY;
+        rDragging = true;
+        reportScreen.classList.add("dragging");
+        e.preventDefault();
+    });
+    document.addEventListener("mousemove", function(e){
+        if(!rDragging) return;
+        rDragCurrentY = e.clientY;
+        var dy = rDragCurrentY - rDragStartY;
+        if(dy < 0) dy = 0;
+        reportScreen.style.transform = "translateY(" + dy + "px)";
+    });
+    document.addEventListener("mouseup", function(){
+        if(!rDragging) return;
+        rDragging = false;
+        reportScreen.classList.remove("dragging");
+        var dy = rDragCurrentY - rDragStartY;
+        var screenH = reportScreen.offsetHeight || 400;
+        if(dy > screenH * 0.3){
+            reportScreen.style.transform = "";
+            closeReportScreen();
+        } else {
+            reportScreen.style.transform = "";
+        }
+    });
+}
+
+input.addEventListener("input", function(){
+    if(input.value.trim().length > 0) addClass(sendBtn, "has-text");
+    else removeClass(sendBtn, "has-text");
+});
+
+/* ============================================================
+   ✅ شاشة الاستماع - مع التعديلات:
+   1. زر الميكروفون: يكتم/يستأنف الصوت
+   2. زر "انقر للمقاطعة": يسكّت تماماً ولا يرسل شيء
+   3. زر لوحة المفاتيح: يعرض النص (صورة 2)
+   ============================================================ */
+var vlsCancel=$("vlsCancel"), vlsMic=$("vlsMic");
+var vlsOrbWrap=$("vlsOrbWrap"), vlsTranscript=$("vlsTranscript"), vlsStatus=$("vlsStatus"), vlsDots=$("vlsDots");
+var vlsKeyboardBtn=$("vlsKeyboardBtn");
+
+var vlsRecognition=null;
+var vlsActive=false;
+var vlsFinalText="";
+var vlsIsPaused=false;
+var vlsInterimText="";
+var vlsShowTranscript=false;
+
+function openVoiceListen(){
+    addClass(voiceListenScreen, "active");
+    vlsActive = true;
+    vlsIsPaused = false;
+    vlsFinalText = "";
+    vlsInterimText = "";
+    vlsShowTranscript = false;
+    vlsTranscript.textContent = "";
+    vlsTranscript.classList.remove("active");
+    removeClass(vlsOrbWrap, "hidden");
+    vlsDots.classList.remove("paused");
+    vlsStatus.textContent = "جارٍ الاستماع...";
+    vlsMic.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>';
+    startVlsRecognition();
+}
+
+/* ✅ الإغلاق: يُلغى كل شيء ولا يُرسل */
+function closeVoiceListen(){
+    vlsActive = false;
+    vlsIsPaused = false;
+    removeClass(voiceListenScreen, "active");
+    stopVlsRecognition();
+    vlsFinalText = "";
+    vlsInterimText = "";
+}
+
+/* ✅ إغلاق نهائي بدون إرسال (عند الضغط على زر المقاطعة) */
+function closeVoiceListenAndCancel(){
+    vlsActive = false;
+    vlsIsPaused = false;
+    removeClass(voiceListenScreen, "active");
+    stopVlsRecognition();
+    vlsFinalText = "";
+    vlsInterimText = "";
+    input.value = "";
+    removeClass(sendBtn, "has-text");
+}
+
+function startVlsRecognition(){
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR) return;
+    try{
+        vlsRecognition = new SR();
+        var langMap = { ar:"ar-SA", en:"en-US", fr:"fr-FR", tr:"tr-TR" };
+        vlsRecognition.lang = langMap[settings.voiceLang] || "ar-SA";
+        vlsRecognition.continuous = true;
+        vlsRecognition.interimResults = true;
+        vlsRecognition.maxAlternatives = 1;
+        vlsRecognition.onresult = function(event){
+            var interim = "";
+            var finalTxt = "";
+            for(var i=event.resultIndex; i<event.results.length; i++){
+                var transcript = event.results[i][0].transcript;
+                if(event.results[i].isFinal) finalTxt += transcript;
+                else interim += transcript;
+            }
+            if(finalTxt){
+                vlsFinalText += finalTxt;
+                dictationHistory.push({
+                    text: finalTxt.trim(),
+                    lang: settings.voiceLang,
+                    actualLang: vlsRecognition.lang,
+                    date: Date.now()
+                });
+                if(dictationHistory.length > 200) dictationHistory.shift();
+                saveState(); updateDictationCountLabel();
+            }
+            vlsInterimText = interim;
+            var fullText = (vlsFinalText + " " + interim).trim();
+            /* ✅ إذا كان زر لوحة المفاتيح مضغوط → نعرض النص دائماً */
+            if(vlsShowTranscript){
+                if(fullText){
+                    vlsTranscript.textContent = fullText;
+                    addClass(vlsTranscript, "active");
+                    addClass(vlsOrbWrap, "hidden");
+                } else {
+                    vlsTranscript.textContent = "";
+                    removeClass(vlsTranscript, "active");
+                    removeClass(vlsOrbWrap, "hidden");
+                }
+            } else {
+                /* السلوك الافتراضي: النص يظهر فقط عند التحدث */
+                if(fullText){
+                    vlsTranscript.textContent = fullText;
+                    addClass(vlsTranscript, "active");
+                    addClass(vlsOrbWrap, "hidden");
+                } else {
+                    removeClass(vlsTranscript, "active");
+                    removeClass(vlsOrbWrap, "hidden");
+                }
+            }
+        };
+        vlsRecognition.onerror = function(){};
+        vlsRecognition.onend = function(){
+            if(vlsActive && !vlsIsPaused){
+                try{ vlsRecognition.start(); }catch(e){}
+            }
+        };
+        vlsRecognition.start();
+    }catch(e){}
+}
+function stopVlsRecognition(){
+    if(vlsRecognition){
+        try{ vlsRecognition.stop(); }catch(e){}
+        vlsRecognition = null;
+    }
+}
+
+/* ✅ زر X الأحمر → إلغاء نهائي (لا يرسل شيء) */
+if(vlsCancel) vlsCancel.addEventListener("click", function(){
+    closeVoiceListenAndCancel();
+});
+
+/* ✅ زر لوحة المفاتيح → يعرض النص (الصورة 2) */
+if(vlsKeyboardBtn) vlsKeyboardBtn.addEventListener("click", function(){
+    vlsShowTranscript = !vlsShowTranscript;
+    var fullText = (vlsFinalText + " " + vlsInterimText).trim();
+    if(vlsShowTranscript){
+        /* عرض النص دائماً */
+        if(fullText){
+            vlsTranscript.textContent = fullText;
+            addClass(vlsTranscript, "active");
+            addClass(vlsOrbWrap, "hidden");
+        } else {
+            /* إذا لا يوجد نص → نخفي الدائرة ونعرض رسالة فارغة */
+            vlsTranscript.textContent = "جارٍ الاستماع... ابدأ التحدث";
+            addClass(vlsTranscript, "active");
+            addClass(vlsOrbWrap, "hidden");
+        }
+    } else {
+        /* إخفاء النص وإظهار الدائرة */
+        if(!fullText){
+            removeClass(vlsTranscript, "active");
+            removeClass(vlsOrbWrap, "hidden");
+        }
+    }
+});
+
+/* ✅ زر الميكروفون: كتم / استئناف */
+if(vlsMic) vlsMic.addEventListener("click", function(){
+    if(!vlsIsPaused){
+        /* كتم الصوت */
+        vlsIsPaused = true;
+        stopVlsRecognition();
+        addClass(vlsOrbWrap, "hidden");
+        vlsDots.classList.add("paused");
+        vlsStatus.textContent = "انقر للمقاطعة";
+    } else {
+        /* استئناف */
+        vlsIsPaused = false;
+        vlsDots.classList.remove("paused");
+        vlsStatus.textContent = "جارٍ الاستماع...";
+        startVlsRecognition();
+    }
+});
+
+/* ============================================================
+   ✅ زر الإرسال (الزر الأزرق) - 3 حالات:
+   1. فارغ → يفتح شاشة الاستماع (صورة الموجة)
+   2. AI يكتب → مربع أبيض (صورة 4 من الطلب الحالي) ← استبدال!
+   3. المستخدم يكتب → مستطيل بنفسجي/وردي + سهم
+   ============================================================ */
+sendBtn.addEventListener("click", function(){
+    var hasText = input.value.trim().length > 0;
+    if(hasText){
+        sendMessage();
+    } else {
+        openVoiceListen();
+    }
+});
+
+/* الميكروفون الصغير — تنبيه فقط */
+micBtn.addEventListener("click", function(){
+    showToast("🎤 استخدم زر الموجة للتحدث");
+});
+
+/* Create Modal */
+function openCreateModal(){ addClass(createModal,"active"); }
+function closeCreateModal(){ removeClass(createModal,"active"); }
+createBtn.addEventListener("click", function(e){
+    e.preventDefault();
+    if(createModal.classList.contains("active")) closeCreateModal(); else openCreateModal();
+});
+document.addEventListener("click", function(e){
+    if(!createModal.classList.contains("active")) return;
+    if(e.target===createBtn || createBtn.contains(e.target)) return;
+    if(createModal.contains(e.target)) return;
+    closeCreateModal();
+});
+var imageFileInput=$("imageFileInput"), videoFileInput=$("videoFileInput"), photoCaptureInput=$("photoCaptureInput");
+videoBtn.addEventListener("click", function(){ closeCreateModal(); videoFileInput.click(); });
+imageBtn.addEventListener("click", function(){ closeCreateModal(); imageFileInput.click(); });
+cameraBtn.addEventListener("click", function(){ closeCreateModal(); photoCaptureInput.click(); });
+photoCaptureInput.addEventListener("change", function(){ var f=photoCaptureInput.files[0]; if(!f){ photoCaptureInput.value=""; return; } handleMediaFile(f,"image"); photoCaptureInput.value=""; });
+imageFileInput.addEventListener("change", function(){ var f=imageFileInput.files[0]; if(f) handleMediaFile(f,"image"); imageFileInput.value=""; });
+videoFileInput.addEventListener("change", function(){ var f=videoFileInput.files[0]; if(f) handleMediaFile(f,"video"); videoFileInput.value=""; });
+
+function handleMediaFile(file, kind){
+    if(sending) return; sending=true;
+    welcome.style.display="none"; chatArea.style.display="flex";
+    var msg=document.createElement("div"); msg.className="message user media-message";
+    var url = URL.createObjectURL(file);
+    if(kind==="image"){ var img=document.createElement("img"); img.src=url; img.className="media-preview"; msg.appendChild(img); }
+    else { var vid=document.createElement("video"); vid.src=url; vid.className="media-preview"; vid.controls=true; msg.appendChild(vid); }
+    var nameEl=document.createElement("div"); nameEl.className="media-name"; nameEl.textContent="📎 "+file.name;
+    msg.appendChild(nameEl); chatArea.appendChild(msg);
+    if(kind==="image") libraryImages.push({url:url, name:file.name});
+    else libraryVideos.push({url:url, name:file.name});
+    if(!currentChatId){
+        var chat={ id:"chat_"+Date.now(), title:file.name.slice(0,40), messages:[], createdAt:Date.now(), pinned:false, archived:false, inProject:false };
+        chatHistory.unshift(chat); currentChatId=chat.id;
+    }
+    pushMessageToHistory("[وسائط] "+file.name, "user");
+    typing.style.display="block";
+    setTimeout(function(){
+        typing.style.display="none";
+        var t = kind==="image" ? "✅ تم رفع الصورة." : "✅ تم رفع الفيديو.";
+        addMessage(t,"ai"); pushMessageToHistory(t,"ai"); playSound(); sending=false;
+        saveState(); renderChatHistoryList();
+    }, 500);
+}
+
+function openLibrary(){
+    addClass(libraryOverlay,"active"); closeSidebarFn(); renderLibrary("images");
+    var tabs=document.querySelectorAll(".library-tab");
+    for(var i=0;i<tabs.length;i++) tabs[i].classList.toggle("active", tabs[i].getAttribute("data-tab")==="images");
+}
+function closeLibraryFn(){ removeClass(libraryOverlay,"active"); }
+openLibraryBtn.addEventListener("click", openLibrary);
+if(openImagesBtn) openImagesBtn.addEventListener("click", function(){ closeSidebarFn(); openLibrary(); });
+closeLibrary.addEventListener("click", closeLibraryFn);
+var libTabs=document.querySelectorAll(".library-tab");
+for(var lt=0; lt<libTabs.length; lt++){
+    (function(tab){
+        tab.addEventListener("click", function(){
+            var all=document.querySelectorAll(".library-tab");
+            for(var x=0;x<all.length;x++) all[x].classList.remove("active");
+            tab.classList.add("active"); renderLibrary(tab.getAttribute("data-tab"));
+        });
+    })(libTabs[lt]);
+}
+function renderLibrary(tab){
+    libraryContent.innerHTML="";
+    var items = (tab==="images") ? libraryImages : libraryVideos;
+    if(items.length===0){
+        var empty=document.createElement("div"); empty.className="library-empty";
+        empty.innerHTML = '<div style="font-size:48px;margin-bottom:12px;">📷</div>لا يوجد ' + (tab==="images"?"صور":"فيديوهات") + ' بعد';
+        libraryContent.appendChild(empty); return;
+    }
+    for(var i=0;i<items.length;i++){ (function(it){
+        var el=document.createElement("div"); el.className="library-item";
+        if(tab==="images"){ var img=document.createElement("img"); img.src=it.url; el.appendChild(img); }
+        else { var vid=document.createElement("video"); vid.src=it.url; vid.muted=true; el.appendChild(vid); }
+        libraryContent.appendChild(el);
+    })(items[i]); }
+}
+
+if(newProjectBtn) newProjectBtn.addEventListener("click", function(e){ e.stopPropagation(); openProjectMenu(newProjectBtn); });
+if(notepadBtn) notepadBtn.addEventListener("click", function(){ closeSidebarFn(); openTasksScreen(); });
+
+var tasksCheckBtn=$("tasksCheckBtn"), tasksListBtn=$("tasksListBtn");
+if(tasksCheckBtn) tasksCheckBtn.addEventListener("click", function(){ tasksCheckBtn.classList.toggle("checked"); tasksListBtn.classList.toggle("checked"); });
+if(tasksListBtn) tasksListBtn.addEventListener("click", function(){ tasksListBtn.classList.toggle("checked"); tasksCheckBtn.classList.toggle("checked"); });
+
+var refFaceInput=$("refFaceInput"), refFullFaceInput=$("refFullFaceInput");
+var refFaceCard=$("refFaceCard"), refFullFaceCard=$("refFullFaceCard");
+var refFaceThumb=$("refFaceThumb"), refFullFaceThumb=$("refFullFaceThumb");
+var refStatusText=$("refStatusText");
+if(refFaceCard) refFaceCard.addEventListener("click", function(){ refFaceInput.click(); });
+if(refFullFaceCard) refFullFaceCard.addEventListener("click", function(){ refFullFaceInput.click(); });
+if(refFaceInput) refFaceInput.addEventListener("change", function(){
+    var f=refFaceInput.files[0]; if(!f) return;
+    var r=new FileReader();
+    r.onload=function(ev){ settings.refFaceData=ev.target.result; renderReferenceThumbs(); saveState(); };
+    r.readAsDataURL(f); refFaceInput.value="";
+});if(refFullFaceInput) refFullFaceInput.addEventListener("change", function(){
+    var f=refFullFaceInput.files[0]; if(!f) return;
+    var r=new FileReader();
+    r.onload=function(ev){ settings.refFullFaceData=ev.target.result; renderReferenceThumbs(); saveState(); };
+    r.readAsDataURL(f); refFullFaceInput.value="";
+});
+function renderReferenceThumbs(){
+    if(!refFaceThumb) return;
+    if(settings.refFaceData){ refFaceThumb.innerHTML=""; var i1=document.createElement("img"); i1.src=settings.refFaceData; refFaceThumb.appendChild(i1); }
+    else refFaceThumb.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/></svg>';
+    if(settings.refFullFaceData){ refFullFaceThumb.innerHTML=""; var i2=document.createElement("img"); i2.src=settings.refFullFaceData; refFullFaceThumb.appendChild(i2); }
+    else refFullFaceThumb.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="4"/><path d="M6 21v-1a6 6 0 016-6 6 6 0 016 6v1"/></svg>';
+    if(refStatusText) refStatusText.textContent = (settings.refFaceData || settings.refFullFaceData) ? "" : "إضافة";
+}
+var toggleHeaders=document.querySelectorAll("[data-toggle]");
+for(var th=0; th<toggleHeaders.length; th++){
+    (function(header){ header.addEventListener("click", function(){ var s=$(header.getAttribute("data-toggle")); if(s) s.classList.toggle("open"); }); })(toggleHeaders[th]);
+}
+var fastAnswersToggle=$("fastAnswersToggle"), customInstructions=$("customInstructions");
+if(fastAnswersToggle) fastAnswersToggle.addEventListener("change", function(){ settings.fastAnswers=fastAnswersToggle.checked; saveState(); });
+if(customInstructions) customInstructions.addEventListener("input", function(){ settings.customInstructions=customInstructions.value; saveState(); });
+
+var memoryToggle=$("memoryToggle"), memoryNickname=$("memoryNickname"), memoryProfession=$("memoryProfession"), memoryAbout=$("memoryAbout");
+if(memoryToggle) memoryToggle.addEventListener("change", function(){ settings.memoryEnabled=memoryToggle.checked; saveState(); });
+if(memoryNickname) memoryNickname.addEventListener("input", function(){ settings.memoryNickname=memoryNickname.value; saveState(); });
+if(memoryProfession) memoryProfession.addEventListener("input", function(){ settings.memoryProfession=memoryProfession.value; saveState(); });
+if(memoryAbout) memoryAbout.addEventListener("input", function(){ settings.memoryAbout=memoryAbout.value; saveState(); });
+
+var permRadioCards=document.querySelectorAll(".perm-radio-card");
+function updatePermSelection(){
+    for(var i=0;i<permRadioCards.length;i++){
+        var c=permRadioCards[i]; c.classList.toggle("selected", c.getAttribute("data-perm-mode")===settings.permMode);
+    }
+}
+for(var p=0;p<permRadioCards.length;p++){
+    (function(card){ card.addEventListener("click", function(){ settings.permMode=card.getAttribute("data-perm-mode"); updatePermSelection(); saveState(); }); })(permRadioCards[p]);
+}
+var safeContentToggle=$("safeContent"), breakReminderToggle=$("breakReminder"), dataProtectionToggle=$("dataProtection");
+if(safeContentToggle) safeContentToggle.addEventListener("change", function(){ settings.safeContent=safeContentToggle.checked; saveState(); });
+if(breakReminderToggle) breakReminderToggle.addEventListener("change", function(){ settings.breakReminder=breakReminderToggle.checked; saveState(); });
+if(dataProtectionToggle) dataProtectionToggle.addEventListener("change", function(){ settings.dataProtection=dataProtectionToggle.checked; saveState(); });
+
+var ratingStars=$("ratingStars"), ratingText=$("ratingText"), ratingFeedback=$("ratingFeedback"), submitRatingBtn=$("submitRatingBtn");
+var selectedRating=0;
+if(ratingStars){
+    ratingStars.addEventListener("click", function(e){
+        var star=e.target.closest(".star"); if(!star) return;
+        var val=+star.getAttribute("data-value"); selectedRating=val;
+        var all=ratingStars.querySelectorAll(".star");
+        for(var i=0;i<all.length;i++) all[i].classList.toggle("active", +all[i].getAttribute("data-value")<=val);
+        var labels=["","سيء","مقبول","جيد","جيد جدًا","ممتاز ⭐"];
+        if(ratingText) ratingText.textContent = labels[val] || "";
+    });
+}
+if(submitRatingBtn) submitRatingBtn.addEventListener("click", function(){
+    if(selectedRating===0){ showToast("⚠️"); return; }
+    settings.userRating=selectedRating;
+    settings.userFeedback = ratingFeedback ? ratingFeedback.value : "";
+    saveState(); showToast("✅");
+    selectedRating=0;
+    if(ratingStars){ var all=ratingStars.querySelectorAll(".star"); for(var i=0;i<all.length;i++) all[i].classList.remove("active"); }
+    if(ratingText) ratingText.textContent="اختر عدد النجوم";
+    if(ratingFeedback) ratingFeedback.value="";
+    showScreen("extensions", true);
+});
+
+var inputEmail=$("inputEmail"), saveEmailBtn=$("saveEmailBtn");
+var accountEmailDisplay=$("accountEmailDisplay"), accountAvatar=$("accountAvatar");
+function updateAccountDisplay(){
+    if(accountEmailDisplay) accountEmailDisplay.textContent = settings.email || "name@example.com";
+    if(accountAvatar){ var letter=(settings.email && settings.email[0]) ? settings.email[0].toUpperCase() : "N"; accountAvatar.textContent=letter; }
+    if(inputEmail) inputEmail.value = settings.email || "";
+}
+if(saveEmailBtn) saveEmailBtn.addEventListener("click", function(){ settings.email=inputEmail.value.trim(); updateAccountDisplay(); saveState(); showToast("✅"); });
+$("switchAccountBtn").addEventListener("click", function(){ showToast("🔄"); });
+$("manageAccountBtn").addEventListener("click", function(){ showToast("🔒"); });
+
+var voiceCards=document.querySelectorAll(".voice-card");
+function updateVoiceCards(){
+    for(var i=0;i<voiceCards.length;i++){
+        var v=voiceCards[i].getAttribute("data-voice"); voiceCards[i].classList.toggle("selected", v===settings.voice);
+    }
+}
+for(var vc=0; vc<voiceCards.length; vc++){
+    (function(card){ card.addEventListener("click", function(){ settings.voice=card.getAttribute("data-voice"); updateVoiceCards(); saveState(); }); })(voiceCards[vc]);
+}
+var voiceBackgroundToggle=$("voiceBackground"), voiceAssistantToggle=$("voiceAssistant");
+if(voiceBackgroundToggle) voiceBackgroundToggle.addEventListener("change", function(){ settings.voiceBackground=voiceBackgroundToggle.checked; saveState(); });
+if(voiceAssistantToggle) voiceAssistantToggle.addEventListener("change", function(){ settings.voiceAssistant=voiceAssistantToggle.checked; saveState(); });
+
+var voiceModelRow=$("voiceModelRow"), modelDropdown=$("modelDropdown"), voiceModelValue=$("voiceModelValue");
+if(voiceModelRow && modelDropdown){
+    voiceModelRow.addEventListener("click", function(e){
+        e.stopPropagation();
+        var isOpen=modelDropdown.classList.contains("active");
+        if(isOpen){ modelDropdown.classList.remove("active"); voiceModelRow.classList.remove("open"); }
+        else { modelDropdown.classList.add("active"); voiceModelRow.classList.add("open"); }
+    });
+    document.addEventListener("click", function(e){
+        if(!modelDropdown.contains(e.target) && !voiceModelRow.contains(e.target)){
+            modelDropdown.classList.remove("active"); voiceModelRow.classList.remove("open");
+        }
+    });
+}
+var modelItems=document.querySelectorAll("#modelDropdown .voice-dropdown-item");
+function updateModelDropdown(){
+    for(var i=0;i<modelItems.length;i++) modelItems[i].classList.toggle("active", modelItems[i].getAttribute("data-model")===settings.voiceModel);
+}
+for(var mi=0; mi<modelItems.length; mi++){
+    (function(item){
+        item.addEventListener("click", function(e){
+            e.stopPropagation();
+            settings.voiceModel=item.getAttribute("data-model"); updateModelDropdown(); saveState();
+            if(voiceModelValue) voiceModelValue.textContent=settings.voiceModel;
+            var supValue=$("valSound"); if(supValue) supValue.textContent=settings.voiceModel;
+            modelDropdown.classList.remove("active"); voiceModelRow.classList.remove("open");
+        });
+    })(modelItems[mi]);
+}
+var voiceLangRow=$("voiceLangRow"), langDropdown=$("langDropdown");
+if(voiceLangRow && langDropdown){
+    voiceLangRow.addEventListener("click", function(e){
+        e.stopPropagation();
+        var isOpen=langDropdown.classList.contains("active");
+        if(isOpen){ langDropdown.classList.remove("active"); voiceLangRow.classList.remove("open"); }
+        else { langDropdown.classList.add("active"); voiceLangRow.classList.add("open"); }
+    });
+    document.addEventListener("click", function(e){
+        if(!langDropdown.contains(e.target) && !voiceLangRow.contains(e.target)){
+            langDropdown.classList.remove("active"); voiceLangRow.classList.remove("open");
+        }
+    });
+}
+var langItems=document.querySelectorAll("#langDropdown .voice-dropdown-item");
+function updateLangDropdown(){
+    for(var i=0;i<langItems.length;i++) langItems[i].classList.toggle("active", langItems[i].getAttribute("data-lang")===settings.voiceLang);
+    var vLang=$("voiceLangValue");
+    if(vLang) vLang.textContent = VOICE_LANG_LABELS[settings.voiceLang] || "Auto-detect";
+}
+for(var li=0; li<langItems.length; li++){
+    (function(item){
+        item.addEventListener("click", function(e){
+            e.stopPropagation();
+            settings.voiceLang=item.getAttribute("data-lang"); updateLangDropdown(); saveState();
+            langDropdown.classList.remove("active"); voiceLangRow.classList.remove("open");
+        });
+    })(langItems[li]);
+}
+var voiceHistoryRow=$("voiceHistoryRow");
+if(voiceHistoryRow) voiceHistoryRow.addEventListener("click", function(){ renderDictationList(); showScreen("dictation", false); });
+
+var screens = {
+    main:$("screen-main"), account:$("screen-account"), language:$("screen-language"),
+    theme:$("screen-theme"), font:$("screen-font"), upgrade:$("screen-upgrade"),
+    custom:$("screen-custom"), memory:$("screen-memory"), sound:$("screen-sound"),
+    notif:$("screen-notif"), extensions:$("screen-extensions"),
+    permissions:$("screen-permissions"), safety:$("screen-safety"),
+    version:$("screen-version"), rating:$("screen-rating"),
+    dictation:$("screen-dictation"), pinned:$("screen-pinned"),
+    archive:$("screen-archive"), savedProjects:$("screen-savedProjects")
+};
+var currentScreen="main";
+
+function showScreen(name, isBack){
+    if(!screens[name]) return;
+    for(var key in screens){ if(screens[key]) screens[key].classList.remove("active","coming-back"); }
+    if(isBack) screens[name].classList.add("active","coming-back");
+    else screens[name].classList.add("active");
+    settingsOverlay.scrollTop=0; currentScreen=name;
+    if(name==="custom"){ if(fastAnswersToggle) fastAnswersToggle.checked=settings.fastAnswers; if(customInstructions) customInstructions.value=settings.customInstructions||""; renderReferenceThumbs(); }
+    if(name==="memory"){ if(memoryToggle) memoryToggle.checked=settings.memoryEnabled; if(memoryNickname) memoryNickname.value=settings.memoryNickname||""; if(memoryProfession) memoryProfession.value=settings.memoryProfession||""; if(memoryAbout) memoryAbout.value=settings.memoryAbout||""; }
+    if(name==="font"){ var sl=$("fontSlider"); if(sl){ sl.value=settings.fontScale; updateSliderFill(); } }
+    if(name==="permissions") updatePermSelection();
+    if(name==="safety"){ if(safeContentToggle) safeContentToggle.checked=settings.safeContent; if(breakReminderToggle) breakReminderToggle.checked=settings.breakReminder; if(dataProtectionToggle) dataProtectionToggle.checked=settings.dataProtection; }
+    if(name==="account") updateAccountDisplay();
+    if(name==="sound"){ updateVoiceCards(); updateModelDropdown(); updateLangDropdown(); if(voiceBackgroundToggle) voiceBackgroundToggle.checked=settings.voiceBackground; if(voiceAssistantToggle) voiceAssistantToggle.checked=settings.voiceAssistant; }
+    if(name==="dictation") renderDictationList();
+    if(name==="pinned") renderPinnedList();
+    if(name==="archive") renderArchiveList();
+    if(name==="savedProjects") renderSavedProjectsList();
+}
+
+openSettingsBtn.addEventListener("click", function(){
+    currentScreen="main";
+    for(var key in screens){ if(screens[key]) screens[key].classList.remove("active","coming-back"); }
+    if(screens.main) screens.main.classList.add("active");
+    addClass(settingsOverlay,"active"); closeSidebarFn();
+});
+closeSettings.addEventListener("click", function(){ removeClass(settingsOverlay,"active"); });
+
+var openBtns=document.querySelectorAll("[data-open]");
+for(var ob=0; ob<openBtns.length; ob++){
+    (function(btn){ btn.addEventListener("click", function(){ showScreen(btn.getAttribute("data-open"), false); }); })(openBtns[ob]);
+}
+var backBtns=document.querySelectorAll("[data-back]");
+for(var bb=0; bb<backBtns.length; bb++){ backBtns[bb].addEventListener("click", function(){ showScreen("main", true); }); }
+var backToBtns=document.querySelectorAll("[data-back-to]");
+for(var bt=0; bt<backToBtns.length; bt++){
+    (function(btn){ btn.addEventListener("click", function(){ showScreen(btn.getAttribute("data-back-to"), true); }); })(backToBtns[bt]);
+}
+
+$("langOptions").addEventListener("click", function(e){ var btn=e.target.closest(".option-item"); if(!btn) return; settings.language=btn.getAttribute("data-lang"); applySettings(); saveState(); });
+$("themeOptions").addEventListener("click", function(e){ var btn=e.target.closest(".option-item"); if(!btn) return; settings.theme=btn.getAttribute("data-theme"); applySettings(); saveState(); });
+themeBtn.addEventListener("click", function(){ settings.theme=(settings.theme==="dark")?"light":"dark"; applySettings(); saveState(); });
+var fontSlider=$("fontSlider"), fontReset=$("fontReset");
+if(fontSlider) fontSlider.addEventListener("input", function(){ settings.fontScale=+fontSlider.value; applyFontScale(); saveState(); });
+if(fontReset) fontReset.addEventListener("click", function(){ settings.fontScale=2; fontSlider.value=2; applyFontScale(); saveState(); });
+$("upgradeNowBtn").addEventListener("click", function(){ showToast("👑"); });
+$("notifOptions").addEventListener("click", function(e){ var btn=e.target.closest(".option-item"); if(!btn) return; settings.notif=(btn.getAttribute("data-notif")==="on"); applySettings(); saveState(); });
+$("logoutBtn").addEventListener("click", function(){ if(!confirm("تسجيل الخروج؟")) return; try{ localStorage.removeItem(STORAGE_KEY); }catch(e){} location.reload(); });
+
+function playSound(){
+    if(!settings.sound) return;
+    try{
+        if(!audioCtx){ var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return; audioCtx=new AC(); }
+        var o=audioCtx.createOscillator(), g=audioCtx.createGain();
+        o.connect(g); g.connect(audioCtx.destination);
+        o.type="sine"; o.frequency.setValueAtTime(660, audioCtx.currentTime);
+        g.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.18);
+        o.start(); o.stop(audioCtx.currentTime+0.2);
+    }catch(e){}
+}function openAiMenu(x, y, wrapEl){
+    activeMessageWrap=wrapEl;
+    aiMenu.style.top=(y+6)+"px"; aiMenu.style.left=(x-10)+"px";
+    var rect=aiMenu.getBoundingClientRect(); var vw=window.innerWidth;
+    if(rect.right>vw-8) aiMenu.style.left=(vw-rect.width-8)+"px";
+    if(x<8) aiMenu.style.left="8px";
+    aiMenu.classList.add("active");
+}
+function closeAiMenu(){ aiMenu.classList.remove("active"); activeMessageWrap=null; }
+document.addEventListener("click", function(e){
+    if(!aiMenu.classList.contains("active")) return;
+    if(aiMenu.contains(e.target)) return;
+    if(e.target.closest(".ai-action-btn")) return;
+    closeAiMenu();
+});
+menuSearchWeb.addEventListener("click", function(){ closeAiMenu(); input.value="ابحث في الويب عن: "; addClass(sendBtn,"has-text"); input.focus(); });
+menuRetry.addEventListener("click", function(){
+    closeAiMenu();
+    if(!lastUserMessage) return;
+    var wrap=activeMessageWrap;
+    if(wrap && wrap.parentNode) wrap.parentNode.removeChild(wrap);
+    input.value=lastUserMessage; addClass(sendBtn,"has-text");
+    setTimeout(function(){ sendMessage(); }, 100);
+});
+
+function buildAiActions(wrapEl){
+    var actions=document.createElement("div"); actions.className="ai-actions";
+    var dotsBtn=document.createElement("button"); dotsBtn.className="ai-action-btn dots"; dotsBtn.type="button";
+    dotsBtn.innerHTML='<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg>';
+    dotsBtn.addEventListener("click", function(e){
+        e.stopPropagation();
+        var rect=dotsBtn.getBoundingClientRect();
+        if(aiMenu.classList.contains("active") && activeMessageWrap===wrapEl) closeAiMenu();
+        else { closeAiMenu(); openAiMenu(rect.right, rect.bottom, wrapEl); }
+    });
+    var shareBtn=document.createElement("button"); shareBtn.className="ai-action-btn"; shareBtn.type="button";
+    shareBtn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="transform:scaleX(-1)"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.2" y1="10.8" x2="15.8" y2="6.4"/><line x1="8.2" y1="13.2" x2="15.8" y2="17.6"/></svg>';
+    shareBtn.addEventListener("click", function(e){ e.stopPropagation(); showToast("🔗"); });
+    var soundBtn=document.createElement("button"); soundBtn.className="ai-action-btn"; soundBtn.type="button";
+    soundBtn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="transform:scaleX(-1)"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8a5 5 0 010 8"/><path d="M19 6a8 8 0 010 12"/></svg>';
+    soundBtn.addEventListener("click", function(e){ e.stopPropagation(); showToast("🔊"); });
+    var copyBtn=document.createElement("button"); copyBtn.className="ai-action-btn"; copyBtn.type="button";
+    copyBtn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="transform:scaleX(-1)"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15V5.5A2.5 2.5 0 017.5 3H17"/></svg>';
+    copyBtn.addEventListener("click", function(e){
+        e.stopPropagation();
+        var msgEl=wrapEl.querySelector(".message.ai");
+        if(msgEl){ try{ if(navigator.clipboard) navigator.clipboard.writeText(msgEl.textContent); }catch(err){} }
+        showToast("⧉");
+    });
+    actions.appendChild(dotsBtn); actions.appendChild(shareBtn); actions.appendChild(soundBtn); actions.appendChild(copyBtn);
+    return actions;
+}
+function setSendWaiting(on){ if(on) sendBtn.classList.add("waiting"); else sendBtn.classList.remove("waiting"); }
+
+function sendMessage(){
+    if(sending) return;
+    var message=input.value.trim(); if(!message) return;
+    lastUserMessage=message; sending=true;
+    removeClass(sendBtn,"has-text");
+    /* ✅ عند بدء الكتابة → مربع أبيض (صورة 4) */
+    addClass(sendBtn,"ai-writing");
+    setSendWaiting(true);
+
+    if(!currentChatId){
+        var chat={ id:"chat_"+Date.now(), title:message.slice(0,40), messages:[], createdAt:Date.now(), pinned:false, archived:false, inProject:false };
+        chatHistory.unshift(chat); currentChatId=chat.id;
+    }
+    pushMessageToHistory(message,"user");
+    input.value="";
+    welcome.style.display="none"; chatArea.style.display="flex";
+    addMessage(message,"user"); typing.style.display="block";
+
+    setTimeout(function(){
+        typing.style.display="none";
+        var reply="هذا رد تجريبي من Nawa AI Studio على: "+message;
+        addMessage(reply,"ai"); pushMessageToHistory(reply,"ai");
+        playSound(); sending=false;
+        setSendWaiting(false);
+        removeClass(sendBtn,"ai-writing");
+        if(input.value.trim().length>0) addClass(sendBtn,"has-text");
+        saveState(); renderChatHistoryList();
+    }, 2000);
+}
+function pushMessageToHistory(text, type){
+    for(var i=0;i<chatHistory.length;i++){
+        if(chatHistory[i].id===currentChatId){ chatHistory[i].messages.push({ text:text, type:type }); return; }
+    }
+}
+function addMessage(text, type, doScroll){
+    if(doScroll===undefined) doScroll=true;
+    if(type==="ai"){
+        var wrap=document.createElement("div"); wrap.className="ai-message-wrap";
+        var msg=document.createElement("div"); msg.className="message ai"; msg.textContent=text;
+        wrap.appendChild(msg); wrap.appendChild(buildAiActions(wrap));
+        chatArea.appendChild(wrap);
+    } else {
+        var message=document.createElement("div"); message.className="message "+type; message.textContent=text;
+        chatArea.appendChild(message);
+    }
+    if(doScroll) setTimeout(function(){ chatArea.scrollTop=chatArea.scrollHeight; }, 50);
+}
+input.addEventListener("keydown", function(e){
+    if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); sendMessage(); }
+});
+
+function resetChat(){
+    chatArea.innerHTML=""; chatArea.style.display="none";
+    welcome.style.display="block"; typing.style.display="none";
+    input.value=""; removeClass(sendBtn,"has-text"); removeClass(sendBtn,"ai-writing"); input.focus();
+    currentChatId=null; lastUserMessage=""; closeAiMenu();
+}
+newChatBtn.addEventListener("click", resetChat);
+startNewSideBtn.addEventListener("click", function(){ resetChat(); closeSidebarFn(); });
+
+(function init(){
+    loadState();
+    for(var c=0;c<chatHistory.length;c++){
+        if(chatHistory[c].pinned===undefined) chatHistory[c].pinned=false;
+        if(chatHistory[c].archived===undefined) chatHistory[c].archived=false;
+        if(chatHistory[c].inProject===undefined) chatHistory[c].inProject=false;
+    }
+    applySettings(); renderChatHistoryList();
+    updateDictationCountLabel(); updatePinnedArchiveCounts(); updateProjectsCount();
+    if(currentChatId){
+        var found=null;
+        for(var i=0;i<chatHistory.length;i++){ if(chatHistory[i].id===currentChatId){ found=chatHistory[i]; break; } }
+        if(found && found.messages.length>0){
+            welcome.style.display="none"; chatArea.style.display="flex";
+            for(var j=0;j<found.messages.length;j++) addMessage(found.messages[j].text, found.messages[j].type, false);
+        }
+    }
+})();
+</script>
+
+</body>
+</html>
